@@ -17,11 +17,10 @@ void OnoderaScene::Initialize() {
 	camera_->setScale({ 1.0f, 1.0f, 1.0f });
 	camera_->Update();
 
-	// 発射台の生成、初期化
-	cannon_ = std::make_unique<Object3d>();
-	cannon_->Initialize("square/square.obj");
-	cannon_->SetCamera(camera_.get());
-	cannon_->SetPosition({ 0.0f, 0.0f, 0.0f });
+	// 発射台の初期化
+	cannon_ = std::make_unique<game::Cannon>();
+	cannon_->Initialize(camera_.get());
+
 	// プレイヤーの生成、初期化
 	player_ = std::make_unique<Object3d>();
 	player_->Initialize("player/player.obj");
@@ -33,7 +32,7 @@ void OnoderaScene::Initialize() {
 	bullet_->SetCamera(camera_.get());
 	bullet_->SetPosition({ 2.0f, 0.0f, 0.0f });
 	// 最初は砲台の位置に置いておく
-	bullet_->SetPosition(cannon_->GetPosition());
+	cannon_->SetBullet(bullet_.get());
 }
 
 // =============================================================================
@@ -53,35 +52,17 @@ void OnoderaScene::Update() {
 
 	player_->SetPosition(pos);
 
-
-	// ============================================================
-	// スペースキーで弾を発射
-	// ============================================================
-	if (input->TriggerKey(DIK_SPACE) && !isBulletFired_) {
-
-		// 弾を砲台の位置へ移動
-		bullet_->SetPosition(cannon_->GetPosition());
-
-		// 発射状態にする
-		isBulletFired_ = true;
-	}
-
-
 	// ============================================================
 	// 弾の移動
 	// ============================================================
-	if (isBulletFired_) {
-
+	if (cannon_->GetIsBulletFired()) {
 		Math::Vector3 bulletPos = bullet_->GetPosition();
-
-		// X+方向へ0.1ずつ移動
+		// X+方向へ移動
 		bulletPos.x += bulletSpeed_;
-
 		bullet_->SetPosition(bulletPos);
 	}
-
-	player_->Update();
 	cannon_->Update();
+	player_->Update();
 	bullet_->Update();
 }
 
@@ -89,8 +70,8 @@ void OnoderaScene::Update() {
 //  描画フェーズ
 // =============================================================================
 void OnoderaScene::Object3DDraw() {
-	player_->Draw();
 	cannon_->Draw();
+	player_->Draw();
 	bullet_->Draw();
 }
 
@@ -104,7 +85,6 @@ void OnoderaScene::ParticleDraw() {}
 void OnoderaScene::ImGuiDraw() {
 #ifdef USE_IMGUI
 
-	cannon_->DrawImGui("3D Object : cannon");
 	player_->DrawImGui("3D Object : player");
 
 #endif
