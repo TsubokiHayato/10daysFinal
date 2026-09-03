@@ -131,8 +131,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\scene\Stage\Field.cpp" />
     <ClCompile Include="application\settings\Settings.cpp" />
     <ClCompile Include="application\audio\AudioManager.cpp" />
-    <ClCompile Include="nagaiScene.cpp" />
-    <ClCompile Include="OnoderaScene.cpp" />
+    <ClCompile Include="application\scene\Member\nagaiScene.cpp" />
+    <ClCompile Include="application\scene\Member\OnoderaScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FadeScreen.h" />
@@ -148,8 +148,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\scene\Stage\Field.h" />
     <ClInclude Include="application\settings\Settings.h" />
     <ClInclude Include="application\audio\AudioManager.h" />
-    <ClInclude Include="nagaiScene.h" />
-    <ClInclude Include="OnoderaScene.h" />
+    <ClInclude Include="application\scene\Member\nagaiScene.h" />
+    <ClInclude Include="application\scene\Member\OnoderaScene.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="EngineCore\EngineLib\EngineLib.vcxproj">

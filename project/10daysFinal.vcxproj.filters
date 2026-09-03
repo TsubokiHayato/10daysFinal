@@ -65,10 +65,10 @@
     <ClCompile Include="application\audio\AudioManager.cpp">
       <Filter>application\audio</Filter>
     </ClCompile>
-    <ClCompile Include="nagaiScene.cpp">
+    <ClCompile Include="application\scene\Member\nagaiScene.cpp">
       <Filter>application\scene\member</Filter>
     </ClCompile>
-    <ClCompile Include="OnoderaScene.cpp">
+    <ClCompile Include="application\scene\Member\OnoderaScene.cpp">
       <Filter>application\scene\member</Filter>
     </ClCompile>
   </ItemGroup>
@@ -110,10 +110,10 @@
     <ClInclude Include="application\audio\AudioManager.h">
       <Filter>application\audio</Filter>
     </ClInclude>
-    <ClInclude Include="OnoderaScene.h">
+    <ClInclude Include="application\scene\Member\OnoderaScene.h">
       <Filter>application\scene\member</Filter>
     </ClInclude>
-    <ClInclude Include="nagaiScene.h">
+    <ClInclude Include="application\scene\Member\nagaiScene.h">
       <Filter>application\scene\member</Filter>
     </ClInclude>
   </ItemGroup>
