@@ -16,6 +16,9 @@
     <Filter Include="application\scene\Option">
       <UniqueIdentifier>{a1000000-0000-0000-0000-000000000005}</UniqueIdentifier>
     </Filter>
+    <Filter Include="application\scene\Stage">
+      <UniqueIdentifier>{a1000000-0000-0000-0000-000000000008}</UniqueIdentifier>
+    </Filter>
     <Filter Include="application\settings">
       <UniqueIdentifier>{a1000000-0000-0000-0000-000000000006}</UniqueIdentifier>
     </Filter>
@@ -40,6 +43,18 @@
     </ClCompile>
     <ClCompile Include="application\scene\Option\OptionScene.cpp">
       <Filter>application\scene\Option</Filter>
+    </ClCompile>
+    <ClCompile Include="application\scene\Stage\StageScene.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\scene\Stage\FollowCamera.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\scene\Stage\Player.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\scene\Stage\Field.cpp">
+      <Filter>application\scene\Stage</Filter>
     </ClCompile>
     <ClCompile Include="application\settings\Settings.cpp">
       <Filter>application\settings</Filter>
@@ -67,6 +82,18 @@
     </ClInclude>
     <ClInclude Include="application\scene\Option\OptionScene.h">
       <Filter>application\scene\Option</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Stage\StageScene.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Stage\FollowCamera.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Stage\Player.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Stage\Field.h">
+      <Filter>application\scene\Stage</Filter>
     </ClInclude>
     <ClInclude Include="application\settings\Settings.h">
       <Filter>application\settings</Filter>

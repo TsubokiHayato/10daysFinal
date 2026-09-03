@@ -125,6 +125,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\scene\Sample\SampleScene.cpp" />
     <ClCompile Include="application\scene\Title\TitleScene.cpp" />
     <ClCompile Include="application\scene\Option\OptionScene.cpp" />
+    <ClCompile Include="application\scene\Stage\StageScene.cpp" />
+    <ClCompile Include="application\scene\Stage\FollowCamera.cpp" />
+    <ClCompile Include="application\scene\Stage\Player.cpp" />
+    <ClCompile Include="application\scene\Stage\Field.cpp" />
     <ClCompile Include="application\settings\Settings.cpp" />
     <ClCompile Include="application\audio\AudioManager.cpp" />
   </ItemGroup>
@@ -136,6 +140,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\scene\Sample\SampleScene.h" />
     <ClInclude Include="application\scene\Title\TitleScene.h" />
     <ClInclude Include="application\scene\Option\OptionScene.h" />
+    <ClInclude Include="application\scene\Stage\StageScene.h" />
+    <ClInclude Include="application\scene\Stage\FollowCamera.h" />
+    <ClInclude Include="application\scene\Stage\Player.h" />
+    <ClInclude Include="application\scene\Stage\Field.h" />
     <ClInclude Include="application\settings\Settings.h" />
     <ClInclude Include="application\audio\AudioManager.h" />
   </ItemGroup>

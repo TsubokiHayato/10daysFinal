@@ -5,6 +5,7 @@
 #include "Sample/SampleScene.h"
 #include "Title/TitleScene.h"
 #include "Option/OptionScene.h"
+#include "Stage/StageScene.h"
 
 #include <memory>
 
@@ -14,4 +15,5 @@ void RegisterGameScenes() {
 	sm->RegisterScene(SAMPLE, [] { return std::make_unique<SampleScene>(); }, "Sample");
 	sm->RegisterScene(TITLE, [] { return std::make_unique<TitleScene>(); }, "Title");
 	sm->RegisterScene(OPTION, [] { return std::make_unique<OptionScene>(); }, "Option");
+	sm->RegisterScene(STAGE, [] { return std::make_unique<StageScene>(); }, "Stage");
 }
