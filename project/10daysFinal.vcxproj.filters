@@ -16,11 +16,17 @@
     <Filter Include="application\scene\Option">
       <UniqueIdentifier>{a1000000-0000-0000-0000-000000000005}</UniqueIdentifier>
     </Filter>
+    <Filter Include="application\scene\Stage">
+      <UniqueIdentifier>{a1000000-0000-0000-0000-000000000008}</UniqueIdentifier>
+    </Filter>
     <Filter Include="application\settings">
       <UniqueIdentifier>{a1000000-0000-0000-0000-000000000006}</UniqueIdentifier>
     </Filter>
     <Filter Include="application\audio">
       <UniqueIdentifier>{a1000000-0000-0000-0000-000000000007}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="application\scene\member">
+      <UniqueIdentifier>{43d96ebc-227e-466f-937d-9cb0ce803ab3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -41,11 +47,38 @@
     <ClCompile Include="application\scene\Option\OptionScene.cpp">
       <Filter>application\scene\Option</Filter>
     </ClCompile>
+    <ClCompile Include="application\scene\Stage\StageScene.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\scene\Stage\FollowCamera.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\scene\Stage\Player.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\scene\Stage\Field.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\scene\Stage\Item.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\scene\Stage\Workbench.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\scene\Stage\PartCatalog.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
     <ClCompile Include="application\settings\Settings.cpp">
       <Filter>application\settings</Filter>
     </ClCompile>
     <ClCompile Include="application\audio\AudioManager.cpp">
       <Filter>application\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="application\scene\Member\nagaiScene.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="application\scene\Member\OnoderaScene.cpp">
+      <Filter>application\scene\member</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -68,11 +101,38 @@
     <ClInclude Include="application\scene\Option\OptionScene.h">
       <Filter>application\scene\Option</Filter>
     </ClInclude>
+    <ClInclude Include="application\scene\Stage\StageScene.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Stage\FollowCamera.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Stage\Player.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Stage\Field.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Stage\Item.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Stage\Workbench.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Stage\PartCatalog.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
     <ClInclude Include="application\settings\Settings.h">
       <Filter>application\settings</Filter>
     </ClInclude>
     <ClInclude Include="application\audio\AudioManager.h">
       <Filter>application\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Member\OnoderaScene.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Member\nagaiScene.h">
+      <Filter>application\scene\member</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
