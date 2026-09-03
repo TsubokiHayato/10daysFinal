@@ -8,7 +8,7 @@
 #endif
 
 using namespace TuboEngine;
-
+ 
 namespace game {
 
 void FollowCamera::Initialize() {
