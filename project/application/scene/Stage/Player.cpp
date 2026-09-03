@@ -49,14 +49,18 @@ void Player::Update() {
 		yaw_ = std::atan2(move.x, move.z) + 3.14159265f;
 	}
 
-	// --- フィールド範囲でクランプ ---
+	// --- フィールド範囲でクランプ（boundCenter_ を中心に ±half） ---
 	if (boundHalfX_ > 0.0f) {
-		if (position_.x > boundHalfX_) position_.x = boundHalfX_;
-		if (position_.x < -boundHalfX_) position_.x = -boundHalfX_;
+		float maxX = boundCenter_.x + boundHalfX_;
+		float minX = boundCenter_.x - boundHalfX_;
+		if (position_.x > maxX) position_.x = maxX;
+		if (position_.x < minX) position_.x = minX;
 	}
 	if (boundHalfZ_ > 0.0f) {
-		if (position_.z > boundHalfZ_) position_.z = boundHalfZ_;
-		if (position_.z < -boundHalfZ_) position_.z = -boundHalfZ_;
+		float maxZ = boundCenter_.z + boundHalfZ_;
+		float minZ = boundCenter_.z - boundHalfZ_;
+		if (position_.z > maxZ) position_.z = maxZ;
+		if (position_.z < minZ) position_.z = minZ;
 	}
 
 	model_->SetPosition(position_);

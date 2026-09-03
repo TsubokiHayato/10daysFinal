@@ -18,8 +18,14 @@ namespace game {
 
 class Field {
 public:
-	// camera : 描画に使う主カメラ
+	// camera : 描画に使う主カメラ。原点中心・既定色で敷く簡易版。
 	void Initialize(TuboEngine::Camera* camera);
+	// フィールドを center を中心に敷く。floorA/floorB は市松模様の2色。
+	// 自陣=青系・敵陣=赤系のように陣営で色を変えられる。
+	void Initialize(TuboEngine::Camera* camera,
+	                const TuboEngine::Math::Vector3& center,
+	                const TuboEngine::Math::Vector4& floorA,
+	                const TuboEngine::Math::Vector4& floorB);
 	void Update();
 	void Draw();
 
@@ -27,6 +33,7 @@ public:
 
 	float GetHalfX() const { return halfX_; }
 	float GetHalfZ() const { return halfZ_; }
+	const TuboEngine::Math::Vector3& GetCenter() const { return center_; }
 
 private:
 	// 壁セグメントを1枚追加するヘルパ
@@ -45,6 +52,7 @@ private:
 	int rows_ = 12;         // Z方向のタイル数
 	float tileScale_ = 3.0f; // タイル1枚のスケール（wall.obj は 2x2 → 実寸 2*scale）
 
+	TuboEngine::Math::Vector3 center_{0.0f, 0.0f, 0.0f}; // フィールド中心
 	float halfX_ = 0.0f; // 中心からの X 半径（実寸）
 	float halfZ_ = 0.0f; // 中心からの Z 半径（実寸）
 };

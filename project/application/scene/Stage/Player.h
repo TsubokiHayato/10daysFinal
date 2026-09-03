@@ -1,4 +1,4 @@
-#pragma once
+				#pragma once
 #include "Object3d.h"
 #include "Vector3.h"
 #include <memory>
@@ -26,8 +26,19 @@ public:
 	void SetPosition(const TuboEngine::Math::Vector3& p) { position_ = p; }
 	const TuboEngine::Math::Vector3& GetPosition() const { return position_; }
 
-	// 移動可能な半径（フィールド半分のサイズ）を渡してクランプに使う
-	void SetMoveBounds(float halfX, float halfZ) { boundHalfX_ = halfX; boundHalfZ_ = halfZ; }
+	// 移動可能な半径（フィールド半分のサイズ）を渡してクランプに使う。
+	// 原点中心で使う簡易版。
+	void SetMoveBounds(float halfX, float halfZ) {
+		boundCenter_ = {0.0f, 0.0f, 0.0f};
+		boundHalfX_ = halfX;
+		boundHalfZ_ = halfZ;
+	}
+	// フィールド中心が原点でない場合（自陣が左寄り等）はこちらで中心も渡す。
+	void SetMoveBounds(const TuboEngine::Math::Vector3& center, float halfX, float halfZ) {
+		boundCenter_ = center;
+		boundHalfX_ = halfX;
+		boundHalfZ_ = halfZ;
+	}
 
 	void SetCamera(TuboEngine::Camera* camera);
 
@@ -43,6 +54,7 @@ private:
 	float yaw_ = 0.0f;        // 向き（Y軸回転）
 
 	// フィールド境界（中心からの半分の広さ）。0以下ならクランプ無効。
+	TuboEngine::Math::Vector3 boundCenter_{0.0f, 0.0f, 0.0f}; // クランプの中心
 	float boundHalfX_ = 0.0f;
 	float boundHalfZ_ = 0.0f;
 };

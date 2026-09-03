@@ -8,7 +8,7 @@
 #endif
 
 using namespace TuboEngine;
-
+ 
 namespace game {
 
 void FollowCamera::Initialize() {
@@ -26,19 +26,35 @@ void FollowCamera::SnapTo(const Math::Vector3& targetPos) {
 }
 
 void FollowCamera::Update(const Math::Vector3& targetPos) {
-	// (1) 注視点をターゲットへ向けて補間（ヌルっと追従）
-	focus_ += (targetPos - focus_) * followLerp_;
+	Update(targetPos, {0.0f, 0.0f, 0.0f}, 0.0f);
+}
 
-	// (2) 注視点の真上やや後方へカメラを配置
+void FollowCamera::Update(const Math::Vector3& targetPos, const Math::Vector3& overviewFocus,
+                          float overview) {
+	// overview を 0〜1 にクランプ。
+	if (overview < 0.0f) overview = 0.0f;
+	if (overview > 1.0f) overview = 1.0f;
+
+	// (1) 注視点：追従先(プレイヤー)と俯瞰の中心(戦場中央)を overview で混ぜる。
+	Math::Vector3 target = {
+		targetPos.x + (overviewFocus.x - targetPos.x) * overview,
+		targetPos.y + (overviewFocus.y - targetPos.y) * overview,
+		targetPos.z + (overviewFocus.z - targetPos.z) * overview,
+	};
+	focus_ += (target - focus_) * followLerp_;
+
+	// (2) 高さ・後方距離も overview で引きの画へ寄せる。
+	float height = height_ + (overviewHeight_ - height_) * overview;
+	float back = back_ + (overviewBack_ - back_) * overview;
+
+	// (3) 注視点の真上やや後方へカメラを配置
 	Math::Vector3 eye = focus_;
-	eye.y += height_;
-	eye.z -= back_;
+	eye.y += height;
+	eye.z -= back;
 	camera_->SetTranslate(eye);
 
-	// (3) 見下ろし角(ピッチ)。カメラ→注視点ベクトルから求める。
-	//     水平距離 back_、垂直距離 height_ を見下ろすので pitch = atan2(height, back)。
-	//     back_ がほぼ 0 のときは真下（π/2）を向く。
-	float pitch = std::atan2(height_, (back_ > 0.001f) ? back_ : 0.001f);
+	// (4) 見下ろし角(ピッチ)。水平距離 back、垂直距離 height を見下ろす。
+	float pitch = std::atan2(height, (back > 0.001f) ? back : 0.001f);
 	camera_->setRotation({pitch, 0.0f, 0.0f});
 
 	camera_->Update();
@@ -47,8 +63,8 @@ void FollowCamera::Update(const Math::Vector3& targetPos) {
 #ifdef USE_IMGUI
 void FollowCamera::DrawImGui() {
 	if (ImGuiManager::GetInstance()->BeginPanel("FollowCamera")) {
-		ImGui::SliderFloat("Height", &height_, 5.0f, 60.0f);
-		ImGui::SliderFloat("Back", &back_, 0.0f, 40.0f);
+		ImGui::SliderFloat("Height", &height_, 5.0f, 120.0f);
+		ImGui::SliderFloat("Back", &back_, 0.0f, 80.0f);
 		ImGui::SliderFloat("Follow Lerp", &followLerp_, 0.02f, 1.0f);
 		const Math::Vector3& e = camera_->GetTranslate();
 		ImGui::Text("Eye  : (%.1f, %.1f, %.1f)", e.x, e.y, e.z);
