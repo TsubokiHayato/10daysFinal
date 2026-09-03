@@ -118,6 +118,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="application\scene\Member\Cannon.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="FadeScreen.cpp" />
     <ClCompile Include="application\Order.cpp" />
@@ -135,6 +136,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\scene\Member\OnoderaScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="application\scene\Member\Cannon.h" />
     <ClInclude Include="FadeScreen.h" />
     <ClInclude Include="application\Order.h" />
     <ClInclude Include="application\scene\GameScenes.h" />

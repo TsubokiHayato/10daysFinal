@@ -55,6 +55,7 @@ void OnoderaScene::Update() {
 	// ============================================================
 	// 弾の移動
 	// ============================================================
+	// 砲台クラスでisBulletFired_がtrueなら発射中の弾の処理を実行(弾クラスとかでやった方がいいかも？)
 	if (cannon_->GetIsBulletFired()) {
 		Math::Vector3 bulletPos = bullet_->GetPosition();
 		// X+方向へ移動

@@ -4,7 +4,7 @@
 namespace TuboEngine { class Camera; }
 
 // =============================================================================
-//  Cannon ── 発射台装置の
+//  Cannon ── 砲台のクラス
 //
 //  ・SPACEで弾を発射することができる
 //
@@ -35,7 +35,7 @@ namespace game {
 		std::unique_ptr<TuboEngine::Object3d> cannon_;
 		// セットする弾
 		TuboEngine::Object3d* bullet_ = nullptr;
-		// 弾が発射中か
+		// 弾が発射中かどうか
 		bool isBulletFired_ = false;
 	};
 }

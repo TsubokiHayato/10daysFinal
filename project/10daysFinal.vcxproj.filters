@@ -71,6 +71,9 @@
     <ClCompile Include="application\scene\Member\OnoderaScene.cpp">
       <Filter>application\scene\member</Filter>
     </ClCompile>
+    <ClCompile Include="application\scene\Member\Cannon.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FadeScreen.h" />
@@ -114,6 +117,9 @@
       <Filter>application\scene\member</Filter>
     </ClInclude>
     <ClInclude Include="application\scene\Member\nagaiScene.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Member\Cannon.h">
       <Filter>application\scene\member</Filter>
     </ClInclude>
   </ItemGroup>
