@@ -2,6 +2,7 @@
 
 #include "Camera.h"
 #include "Input.h"
+#include "Item.h"
 
 #include <cmath>
 
@@ -66,6 +67,11 @@ void Player::Update() {
 	model_->SetPosition(position_);
 	model_->SetRotation({0.0f, yaw_, 0.0f});
 	model_->Update();
+
+	// 手持ちアイテムは頭上に追従させる（実際の描画/Updateは Item 側が行う）。
+	if (carried_) {
+		carried_->SetPosition({position_.x, position_.y + 2.4f, position_.z});
+	}
 }
 
 void Player::Draw() {

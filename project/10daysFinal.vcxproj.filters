@@ -59,6 +59,15 @@
     <ClCompile Include="application\scene\Stage\Field.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
+    <ClCompile Include="application\scene\Stage\Item.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\scene\Stage\Workbench.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\scene\Stage\PartCatalog.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
     <ClCompile Include="application\settings\Settings.cpp">
       <Filter>application\settings</Filter>
     </ClCompile>
@@ -102,6 +111,15 @@
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
     <ClInclude Include="application\scene\Stage\Field.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Stage\Item.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Stage\Workbench.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Stage\PartCatalog.h">
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
     <ClInclude Include="application\settings\Settings.h">
