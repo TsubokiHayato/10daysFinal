@@ -25,6 +25,9 @@
     <Filter Include="application\audio">
       <UniqueIdentifier>{a1000000-0000-0000-0000-000000000007}</UniqueIdentifier>
     </Filter>
+    <Filter Include="application\scene\member">
+      <UniqueIdentifier>{43d96ebc-227e-466f-937d-9cb0ce803ab3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -61,6 +64,12 @@
     </ClCompile>
     <ClCompile Include="application\audio\AudioManager.cpp">
       <Filter>application\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="nagaiScene.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="OnoderaScene.cpp">
+      <Filter>application\scene\member</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -100,6 +109,12 @@
     </ClInclude>
     <ClInclude Include="application\audio\AudioManager.h">
       <Filter>application\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="OnoderaScene.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="nagaiScene.h">
+      <Filter>application\scene\member</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
