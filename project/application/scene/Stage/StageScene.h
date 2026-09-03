@@ -2,11 +2,11 @@
 #include "IScene.h"
 
 #include "DebugCamera.h"
-#include "FollowCamera.h"
-#include "Player.h"
-#include "Field.h"
-#include "Item.h"
-#include "Workbench.h"
+#include "Stage/FollowCamera.h"
+#include "Stage/Player.h"
+#include "Stage/Field.h"
+#include "Stage/Item.h"
+#include "Stage/Workbench.h"
 #include <memory>
 
 #include "Object3d.h"

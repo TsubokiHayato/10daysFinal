@@ -50,22 +50,22 @@
     <ClCompile Include="application\scene\Stage\StageScene.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
-    <ClCompile Include="application\scene\Stage\FollowCamera.cpp">
+    <ClCompile Include="application\Stage\FollowCamera.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
-    <ClCompile Include="application\scene\Stage\Player.cpp">
+    <ClCompile Include="application\Stage\Player.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
-    <ClCompile Include="application\scene\Stage\Field.cpp">
+    <ClCompile Include="application\Stage\Field.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
-    <ClCompile Include="application\scene\Stage\Item.cpp">
+    <ClCompile Include="application\Stage\Item.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
-    <ClCompile Include="application\scene\Stage\Workbench.cpp">
+    <ClCompile Include="application\Stage\Workbench.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
-    <ClCompile Include="application\scene\Stage\PartCatalog.cpp">
+    <ClCompile Include="application\Stage\PartCatalog.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
     <ClCompile Include="application\settings\Settings.cpp">
@@ -80,7 +80,7 @@
     <ClCompile Include="application\scene\Member\OnoderaScene.cpp">
       <Filter>application\scene\member</Filter>
     </ClCompile>
-    <ClCompile Include="application\scene\Member\Cannon.cpp">
+    <ClCompile Include="application\Stage\Cannon.cpp">
       <Filter>application\scene\member</Filter>
     </ClCompile>
   </ItemGroup>
@@ -107,22 +107,22 @@
     <ClInclude Include="application\scene\Stage\StageScene.h">
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="application\scene\Stage\FollowCamera.h">
+    <ClInclude Include="application\Stage\FollowCamera.h">
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="application\scene\Stage\Player.h">
+    <ClInclude Include="application\Stage\Player.h">
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="application\scene\Stage\Field.h">
+    <ClInclude Include="application\Stage\Field.h">
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="application\scene\Stage\Item.h">
+    <ClInclude Include="application\Stage\Item.h">
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="application\scene\Stage\Workbench.h">
+    <ClInclude Include="application\Stage\Workbench.h">
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="application\scene\Stage\PartCatalog.h">
+    <ClInclude Include="application\Stage\PartCatalog.h">
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
     <ClInclude Include="application\settings\Settings.h">
@@ -137,7 +137,7 @@
     <ClInclude Include="application\scene\Member\nagaiScene.h">
       <Filter>application\scene\member</Filter>
     </ClInclude>
-    <ClInclude Include="application\scene\Member\Cannon.h">
+    <ClInclude Include="application\Stage\Cannon.h">
       <Filter>application\scene\member</Filter>
     </ClInclude>
   </ItemGroup>

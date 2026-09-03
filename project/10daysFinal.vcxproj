@@ -118,7 +118,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="application\scene\Member\Cannon.cpp" />
+    <ClCompile Include="application\Stage\Cannon.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="FadeScreen.cpp" />
     <ClCompile Include="application\Order.cpp" />
@@ -127,19 +127,19 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\scene\Title\TitleScene.cpp" />
     <ClCompile Include="application\scene\Option\OptionScene.cpp" />
     <ClCompile Include="application\scene\Stage\StageScene.cpp" />
-    <ClCompile Include="application\scene\Stage\FollowCamera.cpp" />
-    <ClCompile Include="application\scene\Stage\Player.cpp" />
-    <ClCompile Include="application\scene\Stage\Field.cpp" />
-    <ClCompile Include="application\scene\Stage\Item.cpp" />
-    <ClCompile Include="application\scene\Stage\Workbench.cpp" />
-    <ClCompile Include="application\scene\Stage\PartCatalog.cpp" />
+    <ClCompile Include="application\Stage\FollowCamera.cpp" />
+    <ClCompile Include="application\Stage\Player.cpp" />
+    <ClCompile Include="application\Stage\Field.cpp" />
+    <ClCompile Include="application\Stage\Item.cpp" />
+    <ClCompile Include="application\Stage\Workbench.cpp" />
+    <ClCompile Include="application\Stage\PartCatalog.cpp" />
     <ClCompile Include="application\settings\Settings.cpp" />
     <ClCompile Include="application\audio\AudioManager.cpp" />
     <ClCompile Include="application\scene\Member\nagaiScene.cpp" />
     <ClCompile Include="application\scene\Member\OnoderaScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="application\scene\Member\Cannon.h" />
+    <ClInclude Include="application\Stage\Cannon.h" />
     <ClInclude Include="FadeScreen.h" />
     <ClInclude Include="application\Order.h" />
     <ClInclude Include="application\scene\GameScenes.h" />
@@ -148,12 +148,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\scene\Title\TitleScene.h" />
     <ClInclude Include="application\scene\Option\OptionScene.h" />
     <ClInclude Include="application\scene\Stage\StageScene.h" />
-    <ClInclude Include="application\scene\Stage\FollowCamera.h" />
-    <ClInclude Include="application\scene\Stage\Player.h" />
-    <ClInclude Include="application\scene\Stage\Field.h" />
-    <ClInclude Include="application\scene\Stage\Item.h" />
-    <ClInclude Include="application\scene\Stage\Workbench.h" />
-    <ClInclude Include="application\scene\Stage\PartCatalog.h" />
+    <ClInclude Include="application\Stage\FollowCamera.h" />
+    <ClInclude Include="application\Stage\Player.h" />
+    <ClInclude Include="application\Stage\Field.h" />
+    <ClInclude Include="application\Stage\Item.h" />
+    <ClInclude Include="application\Stage\Workbench.h" />
+    <ClInclude Include="application\Stage\PartCatalog.h" />
     <ClInclude Include="application\settings\Settings.h" />
     <ClInclude Include="application\audio\AudioManager.h" />
     <ClInclude Include="application\scene\Member\nagaiScene.h" />

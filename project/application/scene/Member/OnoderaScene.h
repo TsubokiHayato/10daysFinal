@@ -7,7 +7,7 @@
 #include <vector>
 #include "Object3d.h"     // 3D モデル描画
 #include "DebugCamera.h"  // F2 で切り替わるデバッグ用フリーカメラ
-#include "Cannon.h"       // 発射台
+#include "Stage/Cannon.h"       // 発射台
 
 class OnoderaScene : public IScene {
 public:
