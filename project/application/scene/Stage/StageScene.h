@@ -5,6 +5,8 @@
 #include "FollowCamera.h"
 #include "Player.h"
 #include "Field.h"
+#include "Item.h"
+#include "Workbench.h"
 #include <memory>
 
 #include "Object3d.h"
@@ -50,6 +52,15 @@ private:
 	void BuildCastle(const TuboEngine::Math::Vector3& center,
 	                 const TuboEngine::Math::Vector4& color);
 
+	// 図鑑のパーツ定義からアイテムを1つ生成して items_ に積む。
+	game::Item* SpawnPart(const game::PartDef& def, const TuboEngine::Math::Vector3& pos);
+	// 合成結果の砲弾を生成して items_ に積む。
+	game::Item* SpawnShell(const game::ShellStats& stats, const TuboEngine::Math::Vector3& pos);
+	// 自陣にパーツをランダムに散らばらせる。
+	void ScatterParts();
+	// 拾う/捨てる/工作台への載せ降ろし（E/Q キー）を処理する。
+	void HandleItemInteraction();
+
 private:
 	std::unique_ptr<game::FollowCamera> followCamera_;
 	std::unique_ptr<TuboEngine::DebugCamera> debugCamera_;
@@ -57,6 +68,10 @@ private:
 	std::unique_ptr<game::Field> selfField_;  // 自陣(左)
 	std::unique_ptr<game::Field> enemyField_; // 敵陣(右)
 	std::unique_ptr<game::Player> player_;
+
+	// パーツ／砲弾アイテムと工作台。
+	std::vector<std::unique_ptr<game::Item>> items_;
+	std::unique_ptr<game::Workbench> workbench_;
 
 	// 城・砲台などの静的モデルをまとめて所有。
 	std::vector<std::unique_ptr<TuboEngine::Object3d>> props_;

@@ -5,6 +5,8 @@
 
 namespace TuboEngine { class Camera; }
 
+namespace game { class Item; }
+
 // =============================================================================
 //  Player ── プレイヤー本体（見下ろし操作）。
 //
@@ -42,6 +44,11 @@ public:
 
 	void SetCamera(TuboEngine::Camera* camera);
 
+	// 手持ちアイテム（拾う/捨てる/工作台へ載せる際に StageScene から操作する）。
+	void SetCarried(game::Item* item) { carried_ = item; }
+	game::Item* GetCarried() const { return carried_; }
+	bool IsCarrying() const { return carried_ != nullptr; }
+
 #ifdef USE_IMGUI
 	void DrawImGui();
 #endif
@@ -52,6 +59,8 @@ private:
 	TuboEngine::Math::Vector3 position_{0.0f, 1.0f, -20.0f};
 	float moveSpeed_ = 0.25f; // 1フレームあたりの移動量
 	float yaw_ = 0.0f;        // 向き（Y軸回転）
+
+	game::Item* carried_ = nullptr; // 手持ちアイテム（借用。所有は StageScene）
 
 	// フィールド境界（中心からの半分の広さ）。0以下ならクランプ無効。
 	TuboEngine::Math::Vector3 boundCenter_{0.0f, 0.0f, 0.0f}; // クランプの中心

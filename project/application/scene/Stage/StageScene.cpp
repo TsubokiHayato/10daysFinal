@@ -6,6 +6,8 @@
 #include "Input.h"
 #include "LineManager.h"
 
+#include <cstdlib> // rand
+
 #ifdef USE_IMGUI
 #include "externals/imgui/imgui.h"
 #endif
@@ -28,7 +30,18 @@ constexpr Math::Vector4 kEnemyColor = {1.0f, 0.35f, 0.32f, 1.0f};
 
 constexpr float kHalfPi = 1.57079633f;
 
+// アイテム操作の距離。
+constexpr float kPickRange = 3.0f;      // 地面アイテムを拾える距離
+constexpr float kBenchRange = 4.5f;     // 工作台に載せられる距離
+constexpr float kItemGroundY = 0.6f;    // 落ちているアイテムの基準高さ
+
 float Lerp(float a, float b, float t) { return a + (b - a) * t; }
+
+// XZ平面上の距離の2乗（高さは無視）。
+float Dist2XZ(const Math::Vector3& a, const Math::Vector3& b) {
+	float dx = a.x - b.x, dz = a.z - b.z;
+	return dx * dx + dz * dz;
+}
 } // namespace
 
 // =============================================================================
@@ -70,8 +83,53 @@ void StageScene::Initialize() {
 	player_->SetMoveBounds(selfField_->GetCenter(),
 	                       selfField_->GetHalfX() - 1.5f, selfField_->GetHalfZ() - 1.5f);
 
+	// ⑥ 工作台（製作台）。自陣の中央やや手前に置く。
+	const Math::Vector3 selfCenter = selfField_->GetCenter();
+	workbench_ = std::make_unique<game::Workbench>();
+	workbench_->Initialize(cam, {selfCenter.x, 0.0f, selfCenter.z + 4.0f});
+
+	// ⑦ パーツを自陣にランダムに散らばらせる。
+	ScatterParts();
+
 	// カメラをプレイヤー位置へスナップ（開始時にワープして見えないように）
 	followCamera_->SnapTo(player_->GetPosition());
+}
+
+game::Item* StageScene::SpawnPart(const game::PartDef& def, const Math::Vector3& pos) {
+	auto item = std::make_unique<game::Item>();
+	item->InitializeFromDef(followCamera_->GetCamera(), def, pos);
+	game::Item* raw = item.get();
+	items_.push_back(std::move(item));
+	return raw;
+}
+
+game::Item* StageScene::SpawnShell(const game::ShellStats& stats, const Math::Vector3& pos) {
+	auto item = std::make_unique<game::Item>();
+	item->InitializeAsShell(followCamera_->GetCamera(), stats, pos);
+	game::Item* raw = item.get();
+	items_.push_back(std::move(item));
+	return raw;
+}
+
+// 自陣に各種パーツをランダム配置。図鑑の全種類を最低1つは撒く。
+void StageScene::ScatterParts() {
+	const Math::Vector3 c = selfField_->GetCenter();
+	const float hx = selfField_->GetHalfX() - 3.0f;
+	const float hz = selfField_->GetHalfZ() - 3.0f;
+
+	auto randRange = [](float a, float b) {
+		return a + (b - a) * (static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX));
+	};
+	auto scatter = [&](const std::vector<game::PartDef>& defs, int perType) {
+		for (const auto& def : defs) {
+			for (int i = 0; i < perType; ++i) {
+				Math::Vector3 p = {c.x + randRange(-hx, hx), kItemGroundY, c.z + randRange(-hz, hz)};
+				SpawnPart(def, p);
+			}
+		}
+	};
+	scatter(game::BodyDefs(), 2); // 各胴体を2個ずつ
+	scatter(game::HeadDefs(), 2); // 各頭を2個ずつ
 }
 
 // props_ に Object3d を1つ積む。
@@ -132,14 +190,68 @@ void StageScene::Update() {
 	selfField_->Update();
 	enemyField_->Update();
 
+	// (5.5) アイテム操作（拾う/捨てる/工作台へ）と合成
+	HandleItemInteraction();
+
 	// (6) 城・砲台
 	for (auto& p : props_) p->Update();
+
+	// (6.5) 工作台とアイテム
+	workbench_->Update();
+	for (auto& it : items_) it->Update();
 
 	// (7) 任意：ワールドグリッド（デバッグ表示）
 	if (showGrid_) {
 		LineManager::GetInstance()->DrawGrid(
 			(kFieldOffsetX + selfField_->GetHalfX()) * 2.0f, 24, {0.0f, 0.01f, 0.0f},
 			{0.4f, 0.4f, 0.4f, 1.0f});
+	}
+}
+
+// アイテムの拾う/捨てる/工作台への載せ降ろし・合成を処理する。
+//  E : 手ぶら→最寄りの地面アイテムを拾う / 手持ち→工作台が近ければ載せる
+//  Q : 手持ち→その場の地面に捨てる
+void StageScene::HandleItemInteraction() {
+	Input* in = Input::GetInstance();
+	const bool pick = in->TriggerKey(DIK_E);
+	const bool drop = in->TriggerKey(DIK_Q);
+	const Math::Vector3 pp = player_->GetPosition();
+
+	if (pick) {
+		if (player_->IsCarrying()) {
+			// 工作台が近ければ空きスロットへ載せる。
+			if (Dist2XZ(pp, workbench_->GetPosition()) < kBenchRange * kBenchRange) {
+				if (workbench_->TryDeposit(player_->GetCarried())) {
+					player_->SetCarried(nullptr);
+				}
+			}
+		} else {
+			// 手ぶら：最寄りの地面アイテムを拾う。
+			game::Item* best = nullptr;
+			float bestD2 = kPickRange * kPickRange;
+			for (auto& it : items_) {
+				if (!it->IsActive() || it->GetState() != game::Item::State::Ground) continue;
+				float d2 = Dist2XZ(pp, it->GetPosition());
+				if (d2 < bestD2) { bestD2 = d2; best = it.get(); }
+			}
+			if (best) {
+				best->SetState(game::Item::State::Held);
+				player_->SetCarried(best);
+			}
+		}
+	}
+
+	if (drop && player_->IsCarrying()) {
+		game::Item* it = player_->GetCarried();
+		it->SetPosition({pp.x, kItemGroundY, pp.z});
+		it->SetState(game::Item::State::Ground);
+		player_->SetCarried(nullptr);
+	}
+
+	// 胴体+頭がそろったら合成 → 砲弾を出力位置に生成。
+	if (workbench_->IsReady()) {
+		game::ShellStats stats = workbench_->Combine(); // 入力2つを消費
+		SpawnShell(stats, workbench_->GetOutputPosition());
 	}
 }
 
@@ -150,6 +262,8 @@ void StageScene::Object3DDraw() {
 	selfField_->Draw();
 	enemyField_->Draw();
 	for (auto& p : props_) p->Draw();
+	workbench_->Draw();
+	for (auto& it : items_) it->Draw();
 	player_->Draw();
 }
 
@@ -163,8 +277,32 @@ void StageScene::ParticleDraw() {}
 void StageScene::ImGuiDraw() {
 #ifdef USE_IMGUI
 	if (ImGuiManager::GetInstance()->BeginPanel("Stage")) {
-		ImGui::TextWrapped("見下ろしステージ(自陣/敵陣)。WASDで移動 / TAB長押しで全体表示 / F2でデバッグカメラ。");
+		ImGui::TextWrapped("見下ろしステージ(自陣/敵陣)。WASD移動 / E=拾う・工作台へ載せる / Q=捨てる / TAB長押しで全体表示 / F2デバッグカメラ。");
 		ImGui::Separator();
+
+		// アイテム/クラフトの状態表示。
+		int ground = 0, shells = 0;
+		for (auto& it : items_) {
+			if (!it->IsActive()) continue;
+			if (it->GetState() == game::Item::State::Ground) ++ground;
+			if (it->GetCategory() == game::Category::Shell) ++shells;
+		}
+		game::Item* carried = player_->GetCarried();
+		ImGui::Text("手持ち : %s", carried ? carried->GetName().c_str() : "なし");
+		game::Item* body = workbench_->GetBodySlot();
+		game::Item* head = workbench_->GetHeadSlot();
+		ImGui::Text("工作台 : 胴[%s] 頭[%s]",
+		            body ? body->GetName().c_str() : "空",
+		            head ? head->GetName().c_str() : "空");
+		ImGui::Text("地面のアイテム : %d 個 / 砲弾 : %d 個", ground, shells);
+
+		// 手持ち/直近の砲弾のステータスを見せる。
+		if (carried) {
+			const game::PartStats& s = carried->GetStats();
+			ImGui::Text("  威力%.0f 弾速%.2f 爆発%.1f 重%.1f", s.damage, s.speed, s.blast, s.weight);
+		}
+		ImGui::Separator();
+
 		ImGui::Text("Overview : %.2f", overview_);
 		ImGui::Checkbox("World Grid", &showGrid_);
 		ImGui::Spacing();
