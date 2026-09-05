@@ -15,7 +15,7 @@ void FollowCamera::Initialize() {
 	camera_ = std::make_unique<Camera>();
 	// 見下ろし用の投影。near/far はコンストラクタ既定でも良いが明示しておく。
 	camera_->setNearClip(0.1f);
-	camera_->setFarClip(300.0f);
+	camera_->setFarClip(600.0f); // 引きの俯瞰でも奥まで映るように広げる
 	camera_->setScale({1.0f, 1.0f, 1.0f});
 }
 
@@ -63,8 +63,8 @@ void FollowCamera::Update(const Math::Vector3& targetPos, const Math::Vector3& o
 #ifdef USE_IMGUI
 void FollowCamera::DrawImGui() {
 	if (ImGuiManager::GetInstance()->BeginPanel("FollowCamera")) {
-		ImGui::SliderFloat("Height", &height_, 5.0f, 120.0f);
-		ImGui::SliderFloat("Back", &back_, 0.0f, 80.0f);
+		ImGui::SliderFloat("Height", &height_, 5.0f, 200.0f);
+		ImGui::SliderFloat("Back", &back_, 0.0f, 140.0f);
 		ImGui::SliderFloat("Follow Lerp", &followLerp_, 0.02f, 1.0f);
 		const Math::Vector3& e = camera_->GetTranslate();
 		ImGui::Text("Eye  : (%.1f, %.1f, %.1f)", e.x, e.y, e.z);

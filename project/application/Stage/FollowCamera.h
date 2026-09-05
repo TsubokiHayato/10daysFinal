@@ -46,13 +46,13 @@ private:
 
 	std::unique_ptr<TuboEngine::Camera> camera_;
 
-	float height_ = 24.0f;   // ターゲットからの高さ
-	float back_ = 12.0f;     // ターゲットから後方(-Z)への距離
+	float height_ = 40.0f;   // ターゲットからの高さ（引きで広く見せる）
+	float back_ = 24.0f;     // ターゲットから後方(-Z)への距離
 	float followLerp_ = 0.15f; // 追従補間率(0〜1)。1で即追従
 
-	// 全体俯瞰（TABなどで一時的に引く）用のカメラ距離。
-	float overviewHeight_ = 90.0f; // 俯瞰時の高さ
-	float overviewBack_ = 60.0f;   // 俯瞰時の後方距離
+	// 全体俯瞰（TABなどで一時的に引く）用のカメラ距離。両陣を丸ごと見渡す。
+	float overviewHeight_ = 160.0f; // 俯瞰時の高さ
+	float overviewBack_ = 95.0f;    // 俯瞰時の後方距離
 };
 
 } // namespace game

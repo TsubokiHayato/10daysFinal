@@ -6,7 +6,8 @@
 #include "Input.h"
 #include "LineManager.h"
 
-#include <cstdlib> // rand
+#include <algorithm> // remove_if
+#include <cstdlib>   // rand
 
 #ifdef USE_IMGUI
 #include "externals/imgui/imgui.h"
@@ -33,7 +34,9 @@ constexpr float kHalfPi = 1.57079633f;
 // アイテム操作の距離。
 constexpr float kPickRange = 3.0f;      // 地面アイテムを拾える距離
 constexpr float kBenchRange = 4.5f;     // 工作台に載せられる距離
+constexpr float kCannonRange = 5.0f;    // 砲台に弾を装填できる距離
 constexpr float kItemGroundY = 0.6f;    // 落ちているアイテムの基準高さ
+constexpr float kEnemyCastleHP = 200.0f; // 敵の城のHP
 
 float Lerp(float a, float b, float t) { return a + (b - a) * t; }
 
@@ -65,16 +68,34 @@ void StageScene::Initialize() {
 
 	// ③ 城(基地)：各陣の外側の端(谷と反対側)に建てる。
 	const float hx = selfField_->GetHalfX();
+	const Math::Vector3 enemyCastleCenter = {kFieldOffsetX + hx - 8.0f, 0.0f, 0.0f};
 	BuildCastle({-kFieldOffsetX - hx + 8.0f, 0.0f, 0.0f}, kSelfColor);  // 自陣の城(左端)
-	BuildCastle({kFieldOffsetX + hx - 8.0f, 0.0f, 0.0f}, kEnemyColor);  // 敵陣の城(右端)
+	BuildCastle(enemyCastleCenter, kEnemyColor);                        // 敵陣の城(右端)
 
-	// ④ 砲台：各陣の内側の端(谷側)に、相手側を向けて置く。※モデルのみ。
-	selfCannon_ = AddProp("artilleryBattery/artillery battery.obj",
-	                      {-kFieldOffsetX + hx - 6.0f, 0.0f, 0.0f}, {0.0f, -kHalfPi, 0.0f},
-	                      {2.6f, 2.6f, 2.6f}, {1.0f, 1.0f, 1.0f, 1.0f});
+	// 敵の城のロジック（HP・状態異常）を城の位置に用意。弾の的にもなる。
+	enemyCastle_ = std::make_unique<game::Castle>();
+	enemyCastle_->Initialize(enemyCastleCenter, kEnemyCastleHP);
+
+	// ④ 砲台：各陣の内側の端(谷側)に、相手側を向けて置く。見た目は両陣ともプロップ。
+	const Math::Vector3 selfCannonPos = {-kFieldOffsetX + hx - 6.0f, 0.0f, 0.0f};
+	AddProp("artilleryBattery/artillery battery.obj", selfCannonPos, {0.0f, -kHalfPi, 0.0f},
+	        {2.6f, 2.6f, 2.6f}, {1.0f, 1.0f, 1.0f, 1.0f});
 	enemyCannon_ = AddProp("artilleryBattery/artillery battery.obj",
 	                       {kFieldOffsetX - hx + 6.0f, 0.0f, 0.0f}, {0.0f, kHalfPi, 0.0f},
 	                       {2.6f, 2.6f, 2.6f}, {1.0f, 1.0f, 1.0f, 1.0f});
+
+	// 自陣の砲台は作者作の Cannon クラスを「発射フラグを持つ装置」としてロジックのみ使う。
+	//  ・Cannon::Initialize は原点に square モデルを作るが、描画はしない（見た目は上のプロップ）。
+	//  ・SPACEで isBulletFired_ が立つので、それを HandleBullets で読んで弾を発射する。
+	selfCannon_ = std::make_unique<game::Cannon>();
+	selfCannon_->Initialize(cam);
+	// 砲口（弾の発射始点）は砲台プロップの少し上。
+	muzzle_ = selfCannonPos + Math::Vector3{0.0f, 1.5f, 0.0f};
+	// Cannon::Update が参照するダミー弾をセット（SPACEで null 参照しないため。描画しない）。
+	cannonRound_ = std::make_unique<Object3d>();
+	cannonRound_->Initialize("playerBullet/playerBullet.obj");
+	cannonRound_->SetCamera(cam);
+	selfCannon_->SetBullet(cannonRound_.get());
 
 	// ⑤ プレイヤー。自陣の中央あたりに配置し、自陣の範囲でクランプ。
 	player_ = std::make_unique<game::Player>();
@@ -193,8 +214,12 @@ void StageScene::Update() {
 	// (5.5) アイテム操作（拾う/捨てる/工作台へ）と合成
 	HandleItemInteraction();
 
-	// (6) 城・砲台
+	// (5.6) 砲弾の装填・発射・飛翔・命中
+	HandleBullets();
+
+	// (6) 城・砲台（砲台の Update は HandleBullets 内で処理済み）
 	for (auto& p : props_) p->Update();
+	enemyCastle_->Update();
 
 	// (6.5) 工作台とアイテム
 	workbench_->Update();
@@ -255,6 +280,59 @@ void StageScene::HandleItemInteraction() {
 	}
 }
 
+// 砲弾の装填・発射・飛翔・命中を処理する。
+//  R     : 砲弾を手持ちしていて砲台が近く、装填中の弾が無ければ弾を装填する（未発射）。
+//  SPACE : Cannon::Update が発射フラグ(isBulletFired_)を立てる → 装填弾を Fire()。
+//  飛翔・命中判定は弾自身と城が持ち、ここでは仲介するだけ。
+void StageScene::HandleBullets() {
+	Input* in = Input::GetInstance();
+	const Math::Vector3 pp = player_->GetPosition();
+
+	// ── 装填：手持ちの砲弾を Bullet 化して砲口に置く（まだ発射しない）──
+	if (in->TriggerKey(DIK_R) && !pendingBullet_) {
+		game::Item* carried = player_->GetCarried();
+		if (carried && carried->GetCategory() == game::Category::Shell &&
+		    Dist2XZ(pp, muzzle_) < kCannonRange * kCannonRange) {
+			// 弾は「全ステータス＋的」を持って生まれる。的は敵の城の少し上。
+			const Math::Vector3 target = enemyCastle_->GetPosition() + Math::Vector3{0.0f, 3.0f, 0.0f};
+			auto bullet = std::make_unique<game::Bullet>();
+			bullet->Initialize(followCamera_->GetCamera(), carried->GetStats(), muzzle_, target);
+			pendingBullet_ = bullet.get();      // 発射待ち（Fireされるまで砲口で静止）
+			bullets_.push_back(std::move(bullet));
+			// 元の砲弾アイテムは消費する。
+			carried->SetActive(false);
+			player_->SetCarried(nullptr);
+			// 砲台を再装填状態に戻す（前弾のフラグが残っていても撃てるように）。
+			selfCannon_->SetIsBulletFired(false);
+		}
+	}
+
+	// ── 砲台の更新：SPACEで撃つ/撃たないフラグを立てる（作者作の Cannon をそのまま使う）──
+	selfCannon_->Update();
+
+	// ── 発射：砲台のフラグが立ったら、装填済みの弾に Fire() を伝える ──
+	if (selfCannon_->GetIsBulletFired()) {
+		if (pendingBullet_) {
+			pendingBullet_->Fire(); // 以後は弾が自分で的へ飛ぶ
+			pendingBullet_ = nullptr;
+		}
+		selfCannon_->SetIsBulletFired(false); // 次弾に備えてフラグを戻す
+	}
+
+	// ── 飛翔と命中：弾を更新し、的に到達したら城が受ける ──
+	for (auto& b : bullets_) {
+		b->Update();
+		if (b->HasHitTarget()) {
+			enemyCastle_->OnHit(*b); // 城が状態異常フラグを取得する
+		}
+	}
+
+	// 消滅した弾を掃除する。
+	bullets_.erase(std::remove_if(bullets_.begin(), bullets_.end(),
+	                              [](const std::unique_ptr<game::Bullet>& b) { return !b->IsActive(); }),
+	               bullets_.end());
+}
+
 // =============================================================================
 //  描画フェーズ
 // =============================================================================
@@ -262,6 +340,8 @@ void StageScene::Object3DDraw() {
 	selfField_->Draw();
 	enemyField_->Draw();
 	for (auto& p : props_) p->Draw();
+	// selfCannon_ は発射フラグ用のロジックのみ（見た目はプロップ）なので描画しない。
+	for (auto& b : bullets_) b->Draw();
 	workbench_->Draw();
 	for (auto& it : items_) it->Draw();
 	player_->Draw();
@@ -277,7 +357,15 @@ void StageScene::ParticleDraw() {}
 void StageScene::ImGuiDraw() {
 #ifdef USE_IMGUI
 	if (ImGuiManager::GetInstance()->BeginPanel("Stage")) {
-		ImGui::TextWrapped("見下ろしステージ(自陣/敵陣)。WASD移動 / E=拾う・工作台へ載せる / Q=捨てる / TAB長押しで全体表示 / F2デバッグカメラ。");
+		ImGui::TextWrapped("見下ろしステージ(自陣/敵陣)。WASD移動 / E=拾う・工作台へ載せる / Q=捨てる / R=砲台に装填 / SPACE=発射 / TAB長押しで全体表示 / F2デバッグカメラ。");
+		ImGui::Separator();
+
+		// 砲台と敵の城の状態。
+		ImGui::Text("砲台 : %s / 場の弾 : %d",
+		            pendingBullet_ ? "装填済み(SPACEで発射)" : "空(Rで装填)",
+		            static_cast<int>(bullets_.size()));
+		ImGui::Text("敵の城 : HP %.1f / %s", enemyCastle_->GetHP(),
+		            enemyCastle_->IsPoisoned() ? "毒状態" : "正常");
 		ImGui::Separator();
 
 		// アイテム/クラフトの状態表示。
