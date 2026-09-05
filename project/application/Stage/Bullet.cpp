@@ -1,5 +1,6 @@
 #include "Bullet.h"
 #include "Camera.h"
+#include "VisualManager.h"
 #include <cmath>
 
 using namespace TuboEngine;
@@ -75,6 +76,7 @@ void Bullet::Update() {
 			position_ = target_;
 			hitTarget_ = true;
 			active_ = false;
+			VisualManager::GetInstance()->Shake(0.5f, 0.3f);
 		} else {
 			// 始点→的を水平に補間し、放物線(4t(1-t))で高さを足して弧を描く。
 			Math::Vector3 base = Math::Vector3::Lerp(start_, target_, t);
