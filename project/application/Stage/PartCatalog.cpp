@@ -25,6 +25,8 @@ const std::vector<PartDef>& HeadDefs() {
 		{Category::Head, "炸裂弾頭", "star.obj",        {0.95f, 0.35f, 0.30f, 1.0f}, {0.80f, 0.80f, 0.80f}, {3.0f, 0.8f, 3.0f, 0.0f}},
 		{Category::Head, "貫通弾頭", "drill/drill.obj", {0.40f, 0.85f, 0.90f, 1.0f}, {0.90f, 0.90f, 0.90f}, {12.0f, 1.3f, 0.2f, 0.0f}},
 		{Category::Head, "榴弾頭", "tip/tip.obj",       {0.70f, 0.50f, 0.90f, 1.0f}, {0.90f, 0.90f, 0.90f}, {6.0f, 0.9f, 2.0f, 0.0f}},
+		// 状態異常パーツの追加例：statusにフラグを足すだけで「毒弾」になる（コード追加不要）。
+		{Category::Head, "毒弾頭", "cone/cone.obj",     {0.45f, 0.85f, 0.35f, 1.0f}, {0.90f, 0.90f, 0.90f}, {3.0f, 1.0f, 0.5f, 0.0f, Status_Poison}},
 	};
 	return defs;
 }
@@ -40,6 +42,8 @@ ShellStats CombineStats(const PartStats& body, const PartStats& head) {
 	s.weight = body.weight;
 	s.speed = head.speed - (body.weight - 1.0f) * 0.35f;
 	if (s.speed < 0.3f) s.speed = 0.3f;
+	// 状態異常は胴・頭のフラグを両方引き継ぐ（毒胴＋炸裂頭＝毒＋爆発、など）。
+	s.status = body.status | head.status;
 	return s;
 }
 

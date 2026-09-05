@@ -1,6 +1,8 @@
 #pragma once
 #include "Vector3.h"
 #include "Vector4.h"
+#include "StatusEffect.h"
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -16,6 +18,7 @@
 //    speed  : 弾速（主に頭が決める。胴が重いほど下がる）
 //    blast  : 爆発/誘爆の範囲（炸裂・榴弾系の頭で大きい）
 //    weight : 重さ（主に胴。重いほど弾速ダウン、威力は高め）
+//    status : 状態異常フラグ（StatusFlagのOR。毒などを弾に持たせる）
 // =============================================================================
 namespace game {
 
@@ -26,6 +29,7 @@ struct PartStats {
 	float speed = 1.0f;
 	float blast = 0.0f;
 	float weight = 1.0f;
+	uint32_t status = Status_None; // 状態異常フラグ（StatusFlagのOR）
 };
 using ShellStats = PartStats;
 

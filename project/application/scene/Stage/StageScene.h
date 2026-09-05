@@ -7,6 +7,9 @@
 #include "Stage/Field.h"
 #include "Stage/Item.h"
 #include "Stage/Workbench.h"
+#include "Stage/Cannon.h"
+#include "Stage/Bullet.h"
+#include "Stage/Castle.h"
 #include <memory>
 
 #include "Object3d.h"
@@ -60,6 +63,8 @@ private:
 	void ScatterParts();
 	// 拾う/捨てる/工作台への載せ降ろし（E/Q キー）を処理する。
 	void HandleItemInteraction();
+	// 砲弾の装填・発射・飛翔・命中（R=装填 / SPACE=発射）を処理する。
+	void HandleBullets();
 
 private:
 	std::unique_ptr<game::FollowCamera> followCamera_;
@@ -75,8 +80,19 @@ private:
 
 	// 城・砲台などの静的モデルをまとめて所有。
 	std::vector<std::unique_ptr<TuboEngine::Object3d>> props_;
-	TuboEngine::Object3d* selfCannon_ = nullptr;  // props_ が所有（挙動は別担当）
-	TuboEngine::Object3d* enemyCannon_ = nullptr; // props_ が所有
+	TuboEngine::Object3d* enemyCannon_ = nullptr; // props_ が所有（見た目のみ）
+
+	// 自陣の砲台（作者作の Cannon をそのまま使用。撃つ/撃たないフラグを持つ装置）。
+	std::unique_ptr<game::Cannon> selfCannon_;
+	// Cannon::SetBullet 用のダミー弾（Cannon の Update が参照するため。描画はしない）。
+	std::unique_ptr<TuboEngine::Object3d> cannonRound_;
+	TuboEngine::Math::Vector3 muzzle_{0.0f, 0.0f, 0.0f}; // 砲口（弾の発射始点）
+
+	// 発射された砲弾たち。装填済み(未発射)の1発は pendingBullet_ で指す。
+	std::vector<std::unique_ptr<game::Bullet>> bullets_;
+	game::Bullet* pendingBullet_ = nullptr; // 装填済み・発射待ちの弾（bullets_内を借用）
+	// 敵の城（被弾でHP減少・状態異常を受ける）。的の位置にもなる。
+	std::unique_ptr<game::Castle> enemyCastle_;
 
 	float overview_ = 0.0f; // 0=追従 / 1=全体俯瞰。TAB長押しで寄せる。
 	bool showGrid_ = false; // 追加のワールドグリッド表示（デバッグ）
