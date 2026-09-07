@@ -14,7 +14,7 @@ namespace game {
 		easetime_ = 0.0f;                 // イージング経過時間
 		easeduration_ = 0.2f;   	        // 移動時間
 		startpos_ = { -250.0f, 120.0f }; 	// 開始位置
-		endpos_ = { -30.0f, 120.0f }; 	// 終了位置
+		endpos_ = { 0.0f, 120.0f }; 	// 終了位置
 
 		// 表示するスプライトの生成、初期化
 		sprite_ = std::make_unique<TuboEngine::Sprite>();
@@ -28,7 +28,7 @@ namespace game {
 			"ItemType",
 			TextManager::PresetFontNames::Best10 + "_32",
 			"",
-			{ 10.0f, 160.0f },
+			{ 10.0f, 150.0f },
 			{ 1.0f, 1.0f, 1.0f, 1.0f },
 			1.5f
 		);
@@ -37,7 +37,7 @@ namespace game {
 			"ItemParameter",
 			TextManager::PresetFontNames::Best10 + "_32",
 			"",
-			{ 110.0f, 150.0f },
+			{ 110.0f, 140.0f },
 			{ 1.0f, 1.0f, 1.0f, 1.0f },
 			0.5f
 		);
