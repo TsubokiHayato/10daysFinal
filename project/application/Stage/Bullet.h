@@ -6,6 +6,7 @@
 #include <memory>
 
 namespace TuboEngine { class Camera; }
+class IParticleEmitter; // パーティクル（板野サーカス弾の演出用）
 
 // =============================================================================
 //  Bullet ── 砲弾。「すべてのステータス」と「自分の動き」を持つ主役。
@@ -52,7 +53,17 @@ public:
 	void Deactivate() { active_ = false; }
 	void SetCamera(TuboEngine::Camera* camera);
 
+	// 板野サーカス用：うねり(蛇行)の設定。多弾を1発ずつ違う位相で撃つと群れて見える。
+	//  amp   : うねり幅（0=まっすぐ。PartCatalog の swerve をそのまま渡す）
+	//  phase : 位相オフセット（弾ごとにずらすと進行軸まわりの別位置を飛ぶ）
+	void SetSwerve(float amp, float phase) { swerveAmp_ = amp; swervePhase_ = phase; }
+
 private:
+	// 板野サーカス（うねり有り）のときの飛翔更新。速度ベースのホーミング＋演出。
+	void UpdateCircus();
+	// 板野サーカス用の共有パーティクルエミッタを用意する（無ければ生成）。
+	void SetupCircusEmitters();
+
 	std::unique_ptr<TuboEngine::Object3d> model_;
 	ShellStats stats_;
 
@@ -60,7 +71,7 @@ private:
 	TuboEngine::Math::Vector3 start_{0.0f, 0.0f, 0.0f};  // 発射始点（弧の起点）
 	TuboEngine::Math::Vector3 target_{0.0f, 0.0f, 0.0f}; // 的（弧の着弾点）
 
-	// 放物線（弧）で飛ぶためのパラメータ。
+	// 放物線（弧）で飛ぶためのパラメータ（通常弾）。
 	float progress_ = 0.0f;  // 経過フレーム
 	float duration_ = 60.0f; // 着弾までのフレーム数（弾速と距離から決定）
 	float arcHeight_ = 0.0f; // 弧の頂点の高さ（距離から決定）
@@ -69,6 +80,29 @@ private:
 	bool active_ = true;     // 生存フラグ（的到達 or 消滅で false）
 	bool hitTarget_ = false; // 的に到達した瞬間 true（城側が拾う）
 	float spin_ = 0.0f;      // 見た目の回転
+
+	// ── 板野サーカス（速度ベースのホーミング＋コークスクリューうねり）──
+	//  ・元 TuboEngine の PlayerCircusBullet の挙動をこのプロジェクト用に移植。
+	//  ・飛翔は3段階：①まとまって前進 → ②拡散(外へ扇状に散開) → ③うねって的へ収束。
+	bool circus_ = false;      // サーカス弾か（swerve>0 or count>1 で true）
+	bool launched_ = false;    // 初速を与えたか（Fire後の最初のフレームで一度だけ）
+	bool dispersed_ = false;   // 拡散インパルスを与えたか（一度だけ）
+	float elapsedTime_ = 0.0f; // 発射からの経過秒
+	float groupedDuration_ = 0.75f; // ①まとまって前進する時間（秒）。これを過ぎると拡散する。
+	float swerveAmp_ = 0.0f;   // うねり幅（0でまっすぐ）
+	float swervePhase_ = 0.0f; // 位相オフセット（弾ごとにずらす＝拡散方向）
+	float swerveFreq_ = 12.0f; // うねりの速さ
+	float turnSpeed_ = 0.26f;  // 旋回力（的へ吸い込む強さ。拡散後に徐々に強まる）
+	float groupArcHeight_ = 12.0f; // ①まとまり前進の弧(山なり)の高さ（距離に応じて自動設定）
+	TuboEngine::Math::Vector3 forwardDir_{0.0f, 0.0f, 1.0f};      // 的への基本前進方向
+	TuboEngine::Math::Vector3 dispersePoint_{0.0f, 0.0f, 0.0f};   // ①の弧の終点＝拡散が起きる位置
+	TuboEngine::Math::Vector3 velocity_{0.0f, 0.0f, 0.0f};        // 現在速度
+	TuboEngine::Math::Vector3 lastTrailPos_{0.0f, 0.0f, 0.0f};    // 航跡を隙間なく繋ぐ前回位置
+
+	// 共有パーティクルエミッタ（全サーカス弾で使い回す。所有は ParticleManager）。
+	IParticleEmitter* trailEmitter_ = nullptr;
+	IParticleEmitter* burnerEmitter_ = nullptr;
+	IParticleEmitter* explosionEmitter_ = nullptr;
 };
 
 } // namespace game
