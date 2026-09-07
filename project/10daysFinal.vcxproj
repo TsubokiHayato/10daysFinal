@@ -140,6 +140,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\scene\Member\nagaiScene.cpp" />
     <ClCompile Include="application\scene\Member\OnoderaScene.cpp" />
     <ClCompile Include="application\Stage\VisualManager.cpp" />
+    <ClCompile Include="application\Stage\StageEnvironment.cpp" />
+    <ClCompile Include="application\Stage\BulletManager.cpp" />
+    <ClCompile Include="application\Stage\ItemField.cpp" />
+    <ClCompile Include="application\Stage\StageCameraController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\Stage\Cannon.h" />
@@ -165,6 +169,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\scene\Member\nagaiScene.h" />
     <ClInclude Include="application\scene\Member\OnoderaScene.h" />
     <ClInclude Include="application\Stage\VisualManager.h" />
+    <ClInclude Include="application\Stage\StageLayout.h" />
+    <ClInclude Include="application\Stage\StageEnvironment.h" />
+    <ClInclude Include="application\Stage\BulletManager.h" />
+    <ClInclude Include="application\Stage\ItemField.h" />
+    <ClInclude Include="application\Stage\StageCameraController.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="EngineCore\EngineLib\EngineLib.vcxproj">
