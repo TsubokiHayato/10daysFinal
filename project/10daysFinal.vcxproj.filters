@@ -89,6 +89,9 @@
     <ClCompile Include="application\Stage\Castle.cpp">
       <Filter>application\scene\member</Filter>
     </ClCompile>
+    <ClCompile Include="application\Stage\ItemDisplay.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FadeScreen.h" />
@@ -154,6 +157,9 @@
     </ClInclude>
     <ClInclude Include="application\Stage\StatusEffect.h">
       <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\ItemDisplay.h">
+      <Filter>application\scene\Stage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -121,6 +121,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\Stage\Cannon.cpp" />
     <ClCompile Include="application\Stage\Bullet.cpp" />
     <ClCompile Include="application\Stage\Castle.cpp" />
+    <ClCompile Include="application\Stage\ItemDisplay.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="FadeScreen.cpp" />
     <ClCompile Include="application\Order.cpp" />
@@ -144,6 +145,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\Stage\Cannon.h" />
     <ClInclude Include="application\Stage\Bullet.h" />
     <ClInclude Include="application\Stage\Castle.h" />
+    <ClInclude Include="application\Stage\ItemDisplay.h" />
     <ClInclude Include="application\Stage\StatusEffect.h" />
     <ClInclude Include="FadeScreen.h" />
     <ClInclude Include="application\Order.h" />
