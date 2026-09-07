@@ -48,9 +48,16 @@ namespace game {
 		float easetime_;
 		// 移動時間
 		float easeduration_;
-		// 開始位置
+		// spriteの開始位置
 		TuboEngine::Math::Vector2 startpos_;
-		// 終了位置
+		// spriteの終了位置
 		TuboEngine::Math::Vector2 endpos_;
+
+		// テキストの開始位置
+		TuboEngine::Math::Vector2 textTypeStartPos_;
+		TuboEngine::Math::Vector2 textParameterStartPos_;
+		// テキストの終了位置
+		TuboEngine::Math::Vector2 textTypeEndPos_;
+		TuboEngine::Math::Vector2 textParameterEndPos_;
 	};
 }

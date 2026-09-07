@@ -13,8 +13,20 @@ namespace game {
 	void ItemDisplay::Initialize() {
 		easetime_ = 0.0f;                 // イージング経過時間
 		easeduration_ = 0.2f;   	        // 移動時間
+		// スプライトのイージング座標
 		startpos_ = { -250.0f, 120.0f }; 	// 開始位置
 		endpos_ = { 0.0f, 120.0f }; 	// 終了位置
+
+		// ============================================================
+		// テキストの移動座標
+		// ============================================================
+		// ItemType
+		textTypeStartPos_ = { -30.0f, 150.0f };
+		textTypeEndPos_ = { 10.0f, 150.0f };
+
+		// ItemParameter
+		textParameterStartPos_ = { -30.0f, 140.0f };
+		textParameterEndPos_ = { 110.0f, 140.0f };
 
 		// 表示するスプライトの生成、初期化
 		sprite_ = std::make_unique<TuboEngine::Sprite>();
@@ -28,7 +40,7 @@ namespace game {
 			"ItemType",
 			TextManager::PresetFontNames::Best10 + "_32",
 			"",
-			{ 10.0f, 150.0f },
+			textTypeStartPos_,
 			{ 1.0f, 1.0f, 1.0f, 1.0f },
 			1.5f
 		);
@@ -37,7 +49,7 @@ namespace game {
 			"ItemParameter",
 			TextManager::PresetFontNames::Best10 + "_32",
 			"",
-			{ 110.0f, 140.0f },
+			textParameterStartPos_,
 			{ 1.0f, 1.0f, 1.0f, 1.0f },
 			0.5f
 		);
@@ -99,21 +111,53 @@ namespace game {
 			// EaseInOutBack
 			float easedT = EaseInOutBack(t);
 			Math::Vector2 pos;
-			// ========================================================
 			// START → END
-			// ========================================================
 			if (moveforward_) {
 				pos.x = startpos_.x + (endpos_.x - startpos_.x) * easedT;
 				pos.y = startpos_.y + (endpos_.y - startpos_.y) * easedT;
 			}
-			// ========================================================
 			// END → START
-			// ========================================================
 			else {
 				pos.x = endpos_.x + (startpos_.x - endpos_.x) * easedT;
 				pos.y = endpos_.y + (startpos_.y - endpos_.y) * easedT;
 			}
 			sprite_->SetPosition(pos);
+
+			// ============================================================
+			// テキストのイージング移動
+			// ============================================================
+			auto* textManager = TextManager::GetInstance();
+			// ------------------------------------------------------------
+			// ItemType
+			// ------------------------------------------------------------
+			Math::Vector2 typePos;
+			if (moveforward_) {
+				// START → END
+				typePos.x = textTypeStartPos_.x + (textTypeEndPos_.x - textTypeStartPos_.x) * easedT;
+				typePos.y = textTypeStartPos_.y + (textTypeEndPos_.y - textTypeStartPos_.y) * easedT;
+			} else {
+				// END → START
+				typePos.x = textTypeEndPos_.x + (textTypeStartPos_.x - textTypeEndPos_.x) * easedT;
+				typePos.y = textTypeEndPos_.y + (textTypeStartPos_.y - textTypeEndPos_.y) * easedT;
+			}
+			// ------------------------------------------------------------
+			// ItemParameter
+			// ------------------------------------------------------------
+			Math::Vector2 parameterPos;
+
+			if (moveforward_) {
+				// START → END
+				parameterPos.x = textParameterStartPos_.x + (textParameterEndPos_.x - textParameterStartPos_.x) * easedT;
+				parameterPos.y = textParameterStartPos_.y + (textParameterEndPos_.y - textParameterStartPos_.y) * easedT;
+			} else {
+				// END → START
+				parameterPos.x = textParameterEndPos_.x + (textParameterStartPos_.x - textParameterEndPos_.x) * easedT;
+				parameterPos.y = textParameterEndPos_.y + (textParameterStartPos_.y - textParameterEndPos_.y) * easedT;
+			}
+
+			// テキストの位置を更新
+			textManager->GetTextByName("ItemType")->SetPosition(typePos);
+			textManager->GetTextByName("ItemParameter")->SetPosition(parameterPos);
 		}
 		// Spriteの更新
 		sprite_->Update();
