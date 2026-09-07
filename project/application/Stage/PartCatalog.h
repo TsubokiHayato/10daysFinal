@@ -30,8 +30,6 @@ struct PartStats {
 	float blast = 0.0f;
 	float weight = 1.0f;
 	uint32_t status = Status_None; // 状態異常フラグ（StatusFlagのOR）
-	int   count  = 1;    // 発射弾数（板野サーカス弾頭は複数）
-	float swerve = 0.0f; // うねり量（0=まっすぐ / 大きいほど蛇行して的へ収束）
 };
 using ShellStats = PartStats;
 

@@ -89,10 +89,9 @@ private:
 	std::unique_ptr<TuboEngine::Object3d> cannonRound_;
 	TuboEngine::Math::Vector3 muzzle_{0.0f, 0.0f, 0.0f}; // 砲口（弾の発射始点）
 
-	// 発射された砲弾たち。装填済み(未発射)の弾は pendingBullets_ で指す。
-	// サーカス弾頭は1回の装填で複数弾になるためリストで持つ（通常弾は1個）。
+	// 発射された砲弾たち。装填済み(未発射)の1発は pendingBullet_ で指す。
 	std::vector<std::unique_ptr<game::Bullet>> bullets_;
-	std::vector<game::Bullet*> pendingBullets_; // 装填済み・発射待ちの弾（bullets_内を借用）
+	game::Bullet* pendingBullet_ = nullptr; // 装填済み・発射待ちの弾（bullets_内を借用）
 	// 敵の城（被弾でHP減少・状態異常を受ける）。的の位置にもなる。
 	std::unique_ptr<game::Castle> enemyCastle_;
 

@@ -26,18 +26,17 @@ const std::vector<PartDef>& BodyDefs() {
 // ─── 頭パーツ図鑑（弾丸の「先端」3種）───────────────────────────
 //  頭は「弾速」と「爆発/貫通/状態異常の性質」を決める。
 //  3種はそれぞれ性質が分かれる:
-//    貫通弾頭   : 速くて単体火力が高い。爆発はほぼ無し。
-//    炸裂弾頭   : 遅いが爆発範囲が広い。範囲攻撃向き。
-//    サーカス弾頭 : 板野サーカス。1発で小型弾を多数ばらまき、蛇行しながら的へ収束する。
+//    通常弾頭 : バランス型。クセなく扱いやすい標準の弾頭。
+//    貫通弾頭 : 速くて単体火力が高い。爆発はほぼ無し。
+//    炸裂弾頭 : 遅いが爆発範囲が広い。範囲攻撃向き。
 const std::vector<PartDef>& HeadDefs() {
 	static const std::vector<PartDef> defs = {
+		// 通常弾頭：中庸。標準的な威力・弾速・小さめの爆発。コーン型。
+		{Category::Head, "通常弾頭", "cone/cone.obj",   {1.00f, 0.68f, 0.32f, 1.0f}, {0.90f, 0.90f, 0.90f}, {5.0f,  1.0f, 1.0f, 0.0f}},
 		// 貫通弾頭：高速・高火力・爆発ほぼ無し。ドリル型。
 		{Category::Head, "貫通弾頭", "drill/drill.obj", {0.40f, 0.85f, 0.90f, 1.0f}, {0.90f, 0.90f, 0.90f}, {12.0f, 1.4f, 0.2f, 0.0f}},
 		// 炸裂弾頭：低速だが爆発範囲が広い。スター型。
 		{Category::Head, "炸裂弾頭", "star.obj",        {0.95f, 0.35f, 0.30f, 1.0f}, {0.80f, 0.80f, 0.80f}, {3.0f,  0.8f, 3.5f, 0.0f}},
-		// サーカス弾頭：1発が5発の小型弾に分裂。弾ごとに火力は控えめだが、蛇行(swerve)しながら的へ殺到する。
-		//  {damage, speed, blast, weight, status, count, swerve}
-		{Category::Head, "サーカス弾頭", "tip/tip.obj", {1.00f, 0.55f, 0.95f, 1.0f}, {0.70f, 0.70f, 0.70f}, {3.0f,  1.1f, 0.4f, 0.0f, Status_None, 5, 1.6f}},
 	};
 	return defs;
 }
@@ -55,9 +54,6 @@ ShellStats CombineStats(const PartStats& body, const PartStats& head) {
 	if (s.speed < 0.3f) s.speed = 0.3f;
 	// 状態異常は胴・頭のフラグを両方引き継ぐ（毒胴＋炸裂頭＝毒＋爆発、など）。
 	s.status = body.status | head.status;
-	// 弾数・うねりは大きい方を採用（サーカス弾頭を付けると多弾＋蛇行になる）。
-	s.count  = body.count  > head.count  ? body.count  : head.count;
-	s.swerve = body.swerve > head.swerve ? body.swerve : head.swerve;
 	return s;
 }
 

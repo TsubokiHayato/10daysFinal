@@ -6,7 +6,6 @@
 #include "Input.h"
 #include "LineManager.h"
 #include "TextManager.h"
-#include "ParticleManager.h" // 板野サーカス弾の演出（Update/Draw はシーンが駆動する）
 
 #include <algorithm> // remove_if
 #include <cstdlib>   // rand
@@ -242,9 +241,6 @@ void StageScene::Update() {
 	// (4) F2 デバッグカメラ（主カメラを乗っ取る）。追従更新の“後”に適用する。
 	debugCamera_->Update(followCamera_->GetCamera());
 
-	// パーティクル（サーカス弾の航跡・爆発など）を主カメラで更新。
-	ParticleManager::GetInstance()->Update(1.0f / 60.0f, GetMainCamera());
-
 	visualManager_->Update();
 }
 
@@ -304,23 +300,16 @@ void StageScene::HandleBullets() {
 	const Math::Vector3 pp = player_->GetPosition();
 
 	// ── 装填：手持ちの砲弾を Bullet 化して砲口に置く（まだ発射しない）──
-	if (in->TriggerKey(DIK_R) && pendingBullets_.empty()) {
+	if (in->TriggerKey(DIK_R) && !pendingBullet_) {
 		game::Item* carried = player_->GetCarried();
 		if (carried && carried->GetCategory() == game::Category::Shell &&
 		    Dist2XZ(pp, muzzle_) < kCannonRange * kCannonRange) {
 			// 弾は「全ステータス＋的」を持って生まれる。的は敵の城の少し上。
 			const Math::Vector3 target = enemyCastle_->GetPosition() + Math::Vector3{0.0f, 3.0f, 0.0f};
-			const game::ShellStats stats = carried->GetStats();
-			// サーカス弾頭なら count 発、通常弾なら1発。弾ごとに位相をずらして群れさせる。
-			const int shots = stats.count > 1 ? stats.count : 1;
-			for (int i = 0; i < shots; ++i) {
-				auto bullet = std::make_unique<game::Bullet>();
-				bullet->Initialize(followCamera_->GetCamera(), stats, muzzle_, target);
-				// 弾数で360度を等分した位相を割り当てると進行軸まわりに均等に散る（板野サーカス）。
-				bullet->SetSwerve(stats.swerve, 6.283185f * static_cast<float>(i) / static_cast<float>(shots));
-				pendingBullets_.push_back(bullet.get()); // 発射待ち（Fireされるまで砲口で静止）
-				bullets_.push_back(std::move(bullet));
-			}
+			auto bullet = std::make_unique<game::Bullet>();
+			bullet->Initialize(followCamera_->GetCamera(), carried->GetStats(), muzzle_, target);
+			pendingBullet_ = bullet.get();      // 発射待ち（Fireされるまで砲口で静止）
+			bullets_.push_back(std::move(bullet));
 			// 元の砲弾アイテムは消費する。
 			carried->SetActive(false);
 			player_->SetCarried(nullptr);
@@ -332,12 +321,12 @@ void StageScene::HandleBullets() {
 	// ── 砲台の更新：SPACEで撃つ/撃たないフラグを立てる（作者作の Cannon をそのまま使う）──
 	selfCannon_->Update();
 
-	// ── 発射：砲台のフラグが立ったら、装填済みの弾すべてに Fire() を伝える ──
+	// ── 発射：砲台のフラグが立ったら、装填済みの弾に Fire() を伝える ──
 	if (selfCannon_->GetIsBulletFired()) {
-		for (game::Bullet* b : pendingBullets_) {
-			if (b) b->Fire(); // 以後は弾が自分で的へ飛ぶ
+		if (pendingBullet_) {
+			pendingBullet_->Fire(); // 以後は弾が自分で的へ飛ぶ
+			pendingBullet_ = nullptr;
 		}
-		pendingBullets_.clear();
 		selfCannon_->SetIsBulletFired(false); // 次弾に備えてフラグを戻す
 	}
 
@@ -373,9 +362,7 @@ void StageScene::SpriteDraw() {
 	TuboEngine::TextManager::GetInstance()->DrawAll();
 }
 
-void StageScene::ParticleDraw() {
-	ParticleManager::GetInstance()->Draw();
-}
+void StageScene::ParticleDraw() {}
 
 // =============================================================================
 //  ImGui（Debug ビルドのみ）
@@ -388,7 +375,7 @@ void StageScene::ImGuiDraw() {
 
 		// 砲台と敵の城の状態。
 		ImGui::Text("砲台 : %s / 場の弾 : %d",
-		            !pendingBullets_.empty() ? "装填済み(SPACEで発射)" : "空(Rで装填)",
+		            pendingBullet_ ? "装填済み(SPACEで発射)" : "空(Rで装填)",
 		            static_cast<int>(bullets_.size()));
 		ImGui::Text("敵の城 : HP %.1f / %s", enemyCastle_->GetHP(),
 		            enemyCastle_->IsPoisoned() ? "毒状態" : "正常");
