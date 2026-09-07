@@ -10,6 +10,7 @@
 #include "Stage/Cannon.h"
 #include "Stage/Bullet.h"
 #include "Stage/Castle.h"
+#include "Stage/ItemDisplay.h"
 #include <memory>
 
 #include "Object3d.h"
@@ -96,4 +97,7 @@ private:
 
 	float overview_ = 0.0f; // 0=追従 / 1=全体俯瞰。TAB長押しで寄せる。
 	bool showGrid_ = false; // 追加のワールドグリッド表示（デバッグ）
+
+	// アイテムの情報を表示するUIクラス。プレイヤーがアイテムを持つと現れる
+	std::unique_ptr <game::ItemDisplay> itemdisplay_;
 };

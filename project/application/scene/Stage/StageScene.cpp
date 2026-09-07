@@ -13,6 +13,8 @@
 #include "externals/imgui/imgui.h"
 #endif
 
+#include "TextManager.h"
+
 using namespace TuboEngine;
 
 namespace {
@@ -114,6 +116,11 @@ void StageScene::Initialize() {
 
 	// カメラをプレイヤー位置へスナップ（開始時にワープして見えないように）
 	followCamera_->SnapTo(player_->GetPosition());
+
+
+	itemdisplay_ = std::make_unique<game::ItemDisplay>();
+	itemdisplay_->Initialize();
+
 }
 
 game::Item* StageScene::SpawnPart(const game::PartDef& def, const Math::Vector3& pos) {
@@ -214,6 +221,11 @@ void StageScene::Update() {
 	// (5.5) アイテム操作（拾う/捨てる/工作台へ）と合成
 	HandleItemInteraction();
 
+	// (5.5.5) アイテム情報のUI表示
+	// 現在プレイヤーがアイテムを持っているかどうかでUIの挙動が働いている	
+	// アイテムを識別できる機能やパラメータ当のデザインは未実装
+	itemdisplay_->Update(player_->GetCarried());
+
 	// (5.6) 砲弾の装填・発射・飛翔・命中
 	HandleBullets();
 
@@ -231,6 +243,9 @@ void StageScene::Update() {
 			(kFieldOffsetX + selfField_->GetHalfX()) * 2.0f, 24, {0.0f, 0.01f, 0.0f},
 			{0.4f, 0.4f, 0.4f, 1.0f});
 	}
+
+	// (7) TextManager 更新。Particle と同様にシーンが駆動する。
+	TextManager::GetInstance()->UpdateAll();
 }
 
 // アイテムの拾う/捨てる/工作台への載せ降ろし・合成を処理する。
@@ -347,7 +362,11 @@ void StageScene::Object3DDraw() {
 	player_->Draw();
 }
 
-void StageScene::SpriteDraw() {}
+void StageScene::SpriteDraw() {
+	itemdisplay_->Draw();
+
+	TextManager::GetInstance()->DrawAll();
+}
 
 void StageScene::ParticleDraw() {}
 
@@ -413,4 +432,4 @@ void StageScene::ImGuiDraw() {
 // =============================================================================
 //  Finalize
 // =============================================================================
-void StageScene::Finalize() {}
+void StageScene::Finalize() { TextManager::GetInstance()->ClearAllTexts(); }
