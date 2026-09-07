@@ -3,6 +3,7 @@
 #include "externals/imgui/imgui.h"
 #endif
 #include "Input.h"            // キーボード / マウス / ゲームパッド入力（エンジンが毎フレーム自動 Update）
+#include "TextManager.h"
 
 using namespace TuboEngine;
 
@@ -33,6 +34,20 @@ void OnoderaScene::Initialize() {
 	bullet_->SetPosition({ 2.0f, 0.0f, 0.0f });
 	// 最初は砲台の位置に置いておく
 	cannon_->SetBullet(bullet_.get());
+
+	// ───────────────────────────────────────────────────────────
+	//  ⑥ テキスト ── TextManager（シングルトン）。
+	//     CreateText で生成したテキストはエンジン終了まで TextManager 側が所有する。
+	//     Update/Draw はシーンが駆動する（ParticleManager と同じ作法）。
+	// ───────────────────────────────────────────────────────────
+	TextManager::GetInstance()->GetOrCreateFontSized(TextManager::PresetFontNames::Best10, 32.0f);
+	TextManager::GetInstance()->CreateText(
+		TextManager::PresetFontNames::Best10 + "_32",
+		"Sample",
+		{ 40.0f, 220.0f },
+		{1.0f,1.0f,1.0f,1.0f},
+		1.0f
+	);
 }
 
 // =============================================================================
@@ -65,6 +80,9 @@ void OnoderaScene::Update() {
 	cannon_->Update();
 	player_->Update();
 	bullet_->Update();
+
+	// (7) TextManager 更新。Particle と同様にシーンが駆動する。
+	TextManager::GetInstance()->UpdateAll();
 }
 
 // =============================================================================
@@ -76,7 +94,10 @@ void OnoderaScene::Object3DDraw() {
 	bullet_->Draw();
 }
 
-void OnoderaScene::SpriteDraw() {}
+void OnoderaScene::SpriteDraw() {
+	// TextManager が持つテキストの描画。Sprite と同じパイプライン状態で描く。
+	TextManager::GetInstance()->DrawAll();
+}
 
 void OnoderaScene::ParticleDraw() {}
 
@@ -88,10 +109,16 @@ void OnoderaScene::ImGuiDraw() {
 
 	player_->DrawImGui("3D Object : player");
 
+	TextManager::GetInstance()->DrawImGui();     // テキストの本格エディタ（生成/JSONレイアウト保存読込）
 #endif
 }
 
 // =============================================================================
 //  Finalize
 // =============================================================================
-void OnoderaScene::Finalize() {}
+void OnoderaScene::Finalize() {
+
+	// TextManager はシングルトンでシーンを越えて生存するため、
+	// このシーンで作ったテキストは退場時に必ず片付ける。
+	TextManager::GetInstance()->ClearAllTexts();
+}
