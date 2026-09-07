@@ -89,6 +89,7 @@
     <ClCompile Include="application\Stage\Castle.cpp">
       <Filter>application\scene\member</Filter>
     </ClCompile>
+    <ClCompile Include="application\Stage\VisualManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FadeScreen.h" />
@@ -155,5 +156,6 @@
     <ClInclude Include="application\Stage\StatusEffect.h">
       <Filter>application\scene\member</Filter>
     </ClInclude>
+    <ClInclude Include="application\Stage\VisualManager.h" />
   </ItemGroup>
 </Project>

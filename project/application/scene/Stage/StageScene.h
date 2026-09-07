@@ -10,6 +10,7 @@
 #include "Stage/Cannon.h"
 #include "Stage/Bullet.h"
 #include "Stage/Castle.h"
+#include "Stage/VisualManager.h"
 #include <memory>
 
 #include "Object3d.h"
@@ -93,6 +94,8 @@ private:
 	game::Bullet* pendingBullet_ = nullptr; // 装填済み・発射待ちの弾（bullets_内を借用）
 	// 敵の城（被弾でHP減少・状態異常を受ける）。的の位置にもなる。
 	std::unique_ptr<game::Castle> enemyCastle_;
+
+	VisualManager* visualManager_;
 
 	float overview_ = 0.0f; // 0=追従 / 1=全体俯瞰。TAB長押しで寄せる。
 	bool showGrid_ = false; // 追加のワールドグリッド表示（デバッグ）

@@ -139,6 +139,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\audio\AudioManager.cpp" />
     <ClCompile Include="application\scene\Member\nagaiScene.cpp" />
     <ClCompile Include="application\scene\Member\OnoderaScene.cpp" />
+    <ClCompile Include="application\Stage\VisualManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\Stage\Cannon.h" />
@@ -163,6 +164,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\audio\AudioManager.h" />
     <ClInclude Include="application\scene\Member\nagaiScene.h" />
     <ClInclude Include="application\scene\Member\OnoderaScene.h" />
+    <ClInclude Include="application\Stage\VisualManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="EngineCore\EngineLib\EngineLib.vcxproj">

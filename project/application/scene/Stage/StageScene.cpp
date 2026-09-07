@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "Input.h"
 #include "LineManager.h"
+#include "TextManager.h"
 
 #include <algorithm> // remove_if
 #include <cstdlib>   // rand
@@ -114,6 +115,12 @@ void StageScene::Initialize() {
 
 	// カメラをプレイヤー位置へスナップ（開始時にワープして見えないように）
 	followCamera_->SnapTo(player_->GetPosition());
+
+	TextManager::GetInstance()->LoadTextLayout("Resources/Text/StageTutorial.json");
+
+	visualManager_ = VisualManager::GetInstance();
+
+	visualManager_->Initialize(cam);
 }
 
 game::Item* StageScene::SpawnPart(const game::PartDef& def, const Math::Vector3& pos) {
@@ -201,12 +208,6 @@ void StageScene::Update() {
 	const bool wantOverview = Input::GetInstance()->PushKey(DIK_TAB);
 	overview_ += ((wantOverview ? 1.0f : 0.0f) - overview_) * 0.12f;
 
-	// (3) カメラ：基本はプレイヤー追従。overview_ の分だけ戦場中央(原点)を見渡す。
-	followCamera_->Update(player_->GetPosition(), {0.0f, 0.0f, 0.0f}, overview_);
-
-	// (4) F2 デバッグカメラ（主カメラを乗っ取る）。追従更新の“後”に適用する。
-	debugCamera_->Update(followCamera_->GetCamera());
-
 	// (5) フィールド更新
 	selfField_->Update();
 	enemyField_->Update();
@@ -231,6 +232,16 @@ void StageScene::Update() {
 			(kFieldOffsetX + selfField_->GetHalfX()) * 2.0f, 24, {0.0f, 0.01f, 0.0f},
 			{0.4f, 0.4f, 0.4f, 1.0f});
 	}
+
+	TuboEngine::TextManager::GetInstance()->UpdateAll();
+
+	// (3) カメラ：基本はプレイヤー追従。overview_ の分だけ戦場中央(原点)を見渡す。
+	followCamera_->Update(player_->GetPosition(), {0.0f, 0.0f, 0.0f}, overview_);
+
+	// (4) F2 デバッグカメラ（主カメラを乗っ取る）。追従更新の“後”に適用する。
+	debugCamera_->Update(followCamera_->GetCamera());
+
+	visualManager_->Update();
 }
 
 // アイテムの拾う/捨てる/工作台への載せ降ろし・合成を処理する。
@@ -347,7 +358,9 @@ void StageScene::Object3DDraw() {
 	player_->Draw();
 }
 
-void StageScene::SpriteDraw() {}
+void StageScene::SpriteDraw() {
+	TuboEngine::TextManager::GetInstance()->DrawAll();
+}
 
 void StageScene::ParticleDraw() {}
 
@@ -401,6 +414,8 @@ void StageScene::ImGuiDraw() {
 		if (ImGui::Button("Sample へ")) sm->ChangeScene(SAMPLE);
 		ImGui::SameLine();
 		if (ImGui::Button("リロード")) sm->ChangeScene(STAGE);
+
+		TuboEngine::TextManager::GetInstance()->DrawImGui();
 	}
 	ImGuiManager::GetInstance()->EndPanel();
 
@@ -413,4 +428,7 @@ void StageScene::ImGuiDraw() {
 // =============================================================================
 //  Finalize
 // =============================================================================
-void StageScene::Finalize() {}
+void StageScene::Finalize() {
+	TuboEngine::TextManager::GetInstance()->ClearAllTexts();
+	TuboEngine::TextManager::GetInstance()->ClearAllSprites();
+}
