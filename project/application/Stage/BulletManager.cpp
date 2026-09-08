@@ -2,10 +2,11 @@
 #include "StageLayout.h"
 #include "Stage/Player.h"
 #include "Stage/Item.h"
-#include "Stage/Castle.h"
+#include "Stage/Field.h"
 #include "Object3d.h"
 #include "Camera.h"
-#include "Input.h" 
+#include "Input.h"
+#include <cstdlib>
 
 using namespace TuboEngine;
 
@@ -13,11 +14,18 @@ namespace game {
 
 using namespace game::layout;
 
+namespace {
+// [-1,1] の擬似乱数（着弾を大砲中央付近にばらけさせる用）。
+float Rand11() { return (static_cast<float>(std::rand()) / RAND_MAX) * 2.0f - 1.0f; }
+} // namespace
+
 void BulletManager::Initialize(TuboEngine::Camera* camera,
-                               const Math::Vector3& muzzle, Castle* enemyCastle) {
+                               const Math::Vector3& muzzle, Field* enemyField,
+                               const Math::Vector3& target) {
 	camera_ = camera;
 	muzzle_ = muzzle;
-	enemyCastle_ = enemyCastle;
+	enemyField_ = enemyField;
+	target_ = target;
 
 	// 砲台は「発射フラグを持つ装置」としてロジックのみ使う（見た目はプロップ側）。
 	cannon_ = std::make_unique<Cannon>();
@@ -37,8 +45,10 @@ bool BulletManager::TryLoad(Player* player) {
 	// 砲台が近くにあること。
 	if (Dist2XZ(player->GetPosition(), muzzle_) >= kCannonRange * kCannonRange) return false;
 
-	// 弾は「全ステータス＋的」を持って生まれる。的は敵の城の少し上。
-	const Math::Vector3 target = enemyCastle_->GetPosition() + Math::Vector3{0.0f, 3.0f, 0.0f};
+	// 弾は「全ステータス＋的」を持って生まれる。的は相手大砲(中央)付近の床。
+	//  毎回ど真ん中だと同じタイルばかり削れるので、中央付近に少しばらけさせる。
+	const Math::Vector3 target = target_ + Math::Vector3{Rand11() * kFloorScatter, 0.0f,
+	                                                     Rand11() * kFloorScatter};
 	auto bullet = std::make_unique<Bullet>();
 	bullet->Initialize(camera_, carried->GetStats(), muzzle_, target);
 	pending_ = bullet.get();      // 発射待ち（Fireされるまで砲口で静止）
@@ -64,11 +74,14 @@ void BulletManager::Update() {
 		cannon_->SetIsBulletFired(false); // 次弾に備えてフラグを戻す
 	}
 
-	// ── 飛翔と命中：弾を更新し、的に到達したら城が受ける ──
+	// ── 飛翔と命中：弾を更新し、的に到達したら相手の床タイルを削る ──
 	for (auto& b : bullets_) {
 		b->Update();
 		if (b->HasHitTarget()) {
-			enemyCastle_->OnHit(*b); // 城が状態異常フラグを取得する
+			const ShellStats& s = b->GetStats();
+			float dmg = s.damage * kPlayerFloorDmgMul;
+			float radius = kFloorHitBaseRadius + s.blast * kFloorHitBlastRadius;
+			enemyField_->ApplyDamage(b->GetTarget(), dmg, radius);
 		}
 	}
 

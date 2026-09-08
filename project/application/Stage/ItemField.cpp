@@ -16,10 +16,10 @@ void ItemField::Initialize(TuboEngine::Camera* camera, Field* selfField) {
 	camera_ = camera;
 	selfField_ = selfField;
 
-	// 工作台（製作台）。自陣の中央やや手前に置く。
+	// 工作台（製作台）。中央の大砲(キャノン)のすぐ手前(下)＝足元に置く。
 	const Math::Vector3 selfCenter = selfField_->GetCenter();
 	workbench_ = std::make_unique<Workbench>();
-	workbench_->Initialize(camera_, {selfCenter.x, 0.0f, selfCenter.z + 4.0f});
+	workbench_->Initialize(camera_, {selfCenter.x, 0.0f, selfCenter.z - 4.0f});
 
 	// パーツを自陣にランダムに散らばらせる。
 	ScatterParts();

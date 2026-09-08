@@ -13,13 +13,17 @@ namespace game::layout {
 // 各陣フィールドの中心 |X|。自陣=-, 敵陣=+。中央に谷ができる距離にする。
 constexpr float kFieldOffsetX = 30.0f;
 
-// 陣営の床色(市松2色)。
+// 陣営の床色(市松2色)。床は「HP」を兼ねるので健康時は両陣とも青系にし、
+// 被弾するほど赤(kFloorDamaged)へ寄せていく（陣の識別は青の色味差で残す）。
 constexpr TuboEngine::Math::Vector4 kSelfFloorA = {0.30f, 0.42f, 0.66f, 1.0f};
 constexpr TuboEngine::Math::Vector4 kSelfFloorB = {0.22f, 0.32f, 0.54f, 1.0f};
-constexpr TuboEngine::Math::Vector4 kEnemyFloorA = {0.62f, 0.32f, 0.34f, 1.0f};
-constexpr TuboEngine::Math::Vector4 kEnemyFloorB = {0.50f, 0.24f, 0.26f, 1.0f};
+constexpr TuboEngine::Math::Vector4 kEnemyFloorA = {0.24f, 0.46f, 0.60f, 1.0f};
+constexpr TuboEngine::Math::Vector4 kEnemyFloorB = {0.18f, 0.36f, 0.50f, 1.0f};
 
-// 城の紋章(旗代わり)色＝陣営色。
+// 被弾で床が寄っていく色（HPゼロに近いほどこの赤になる）。
+constexpr TuboEngine::Math::Vector4 kFloorDamaged = {0.88f, 0.16f, 0.14f, 1.0f};
+
+// 陣営の識別色（大砲プロップの色味などに使う）。
 constexpr TuboEngine::Math::Vector4 kSelfColor = {0.35f, 0.55f, 1.0f, 1.0f};
 constexpr TuboEngine::Math::Vector4 kEnemyColor = {1.0f, 0.35f, 0.32f, 1.0f};
 
@@ -31,7 +35,13 @@ constexpr float kBenchRange = 4.5f;      // 工作台に載せられる距離
 constexpr float kCannonRange = 5.0f;     // 砲台に弾を装填できる距離
 constexpr float kCannonZoomRange = 9.0f; // この距離まで砲台に近づくと自動ズームアウト
 constexpr float kItemGroundY = 0.6f;     // 落ちているアイテムの基準高さ
-constexpr float kEnemyCastleHP = 200.0f; // 敵の城のHP
+
+// 床(フィールド)をHP化するための設定。
+constexpr float kTileMaxHP = 20.0f;           // 床タイル1枚あたりのHP
+constexpr float kFloorHitBaseRadius = 4.5f;   // 着弾ダメージが及ぶ基本半径
+constexpr float kFloorHitBlastRadius = 1.4f;  // 弾のblast1あたりの追加半径
+constexpr float kPlayerFloorDmgMul = 4.0f;    // プレイヤー弾→床ダメージ倍率
+constexpr float kFloorScatter = 7.0f;         // 着弾を大砲中心付近にばらけさせる幅
 
 } // namespace game::layout
 

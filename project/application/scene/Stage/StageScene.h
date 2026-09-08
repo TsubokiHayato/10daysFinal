@@ -5,6 +5,7 @@
 #include "Stage/StageEnvironment.h"
 #include "Stage/ItemField.h"
 #include "Stage/BulletManager.h"
+#include "Stage/EnemyConveyor.h"
 #include "Stage/StageCameraController.h"
 #include "Stage/VisualManager.h"
 #include <memory>
@@ -39,6 +40,7 @@ private:
 	std::unique_ptr<game::Player> player_;
 	std::unique_ptr<game::ItemField> itemField_;
 	std::unique_ptr<game::BulletManager> bulletManager_;
+	std::unique_ptr<game::EnemyConveyor> enemyConveyor_;
 
 	VisualManager* visualManager_ = nullptr;
 };

@@ -33,33 +33,23 @@ void StageEnvironment::Initialize(TuboEngine::Camera* camera) {
 	enemyField_ = std::make_unique<Field>();
 	enemyField_->Initialize(camera_, {kFieldOffsetX, 0.0f, 0.0f}, kEnemyFloorA, kEnemyFloorB);
 
-	// ③ 城(基地)：各陣の外側の端(谷と反対側)に建てる。城が自分で見た目を組み立てる。
-	const float hx = selfField_->GetHalfX();
-	const Math::Vector3 selfCastleCenter = {-kFieldOffsetX - hx + 8.0f, 0.0f, 0.0f};
-	const Math::Vector3 enemyCastleCenter = {kFieldOffsetX + hx - 8.0f, 0.0f, 0.0f};
-	selfCastle_ = std::make_unique<Castle>();
-	selfCastle_->Initialize(camera_, selfCastleCenter, kSelfColor, kEnemyCastleHP);
-	enemyCastle_ = std::make_unique<Castle>();
-	enemyCastle_->Initialize(camera_, enemyCastleCenter, kEnemyColor, kEnemyCastleHP);
-
-	// ④ 砲台：各陣の内側の端(谷側)に、相手側を向けて置く（見た目のみ）。
-	const Math::Vector3 selfCannonPos = {-kFieldOffsetX + hx - 6.0f, 0.0f, 0.0f};
-	AddProp("artilleryBattery/artillery battery.obj", selfCannonPos, {0.0f, -kHalfPi, 0.0f},
+	// ③ 大砲：各フィールドの真ん中に、相手側を向けて置く（見た目のみ）。
+	//    弾はこの中央大砲を狙って飛び、相手フィールド中央の床を削る。
+	selfCannonPos_ = selfField_->GetCenter();   // {-kFieldOffsetX, 0, 0}
+	enemyCannonPos_ = enemyField_->GetCenter();  // {+kFieldOffsetX, 0, 0}
+	AddProp("artilleryBattery/artillery battery.obj", selfCannonPos_, {0.0f, -kHalfPi, 0.0f},
 	        {2.6f, 2.6f, 2.6f}, {1.0f, 1.0f, 1.0f, 1.0f});
-	enemyCannon_ = AddProp("artilleryBattery/artillery battery.obj",
-	                       {kFieldOffsetX - hx + 6.0f, 0.0f, 0.0f}, {0.0f, kHalfPi, 0.0f},
-	                       {2.6f, 2.6f, 2.6f}, {1.0f, 1.0f, 1.0f, 1.0f});
+	AddProp("artilleryBattery/artillery battery.obj", enemyCannonPos_, {0.0f, kHalfPi, 0.0f},
+	        {2.6f, 2.6f, 2.6f}, {1.0f, 1.0f, 1.0f, 1.0f});
 
-	// 砲口（弾の発射始点）は砲台プロップの少し上。BulletManager に渡す。
-	muzzle_ = selfCannonPos + Math::Vector3{0.0f, 1.5f, 0.0f};
+	// 砲口（弾の発射始点）は大砲プロップの少し上。BulletManager に渡す。
+	muzzle_ = selfCannonPos_ + Math::Vector3{0.0f, 1.5f, 0.0f};
 }
 
 void StageEnvironment::Update() {
 	selfField_->Update();
 	enemyField_->Update();
 	for (auto& p : props_) p->Update();
-	selfCastle_->Update();
-	enemyCastle_->Update();
 
 	// 任意：ワールドグリッド（デバッグ表示）。
 	if (showGrid_) {
@@ -73,8 +63,6 @@ void StageEnvironment::Draw() {
 	selfField_->Draw();
 	enemyField_->Draw();
 	for (auto& p : props_) p->Draw();
-	selfCastle_->Draw();
-	enemyCastle_->Draw();
 }
 
 } // namespace game

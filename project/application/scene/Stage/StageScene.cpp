@@ -39,9 +39,16 @@ void StageScene::Initialize() {
 	itemField_ = std::make_unique<game::ItemField>();
 	itemField_->Initialize(cam, selfField);
 
-	// ⑤ 砲台・砲弾システム（的は敵の城）
+	// ⑤ 砲台・砲弾システム（的は敵陣中央の大砲。着弾で相手の床を削る）
+	game::Field* enemyField = environment_->GetEnemyField();
 	bulletManager_ = std::make_unique<game::BulletManager>();
-	bulletManager_->Initialize(cam, environment_->GetMuzzle(), environment_->GetEnemyCastle());
+	bulletManager_->Initialize(cam, environment_->GetMuzzle(), enemyField,
+	                           environment_->GetEnemyCannonPos());
+
+	// ⑥ 敵の攻撃：敵陣のベルトコンベアが球パーツを運び、大砲に届くと自陣を撃つ。
+	enemyConveyor_ = std::make_unique<game::EnemyConveyor>();
+	enemyConveyor_->Initialize(cam, enemyField, environment_->GetEnemyCannonPos(),
+	                           environment_->GetSelfCannonPos(), selfField);
 
 	// カメラをプレイヤー位置へスナップ（開始時にワープして見えないように）
 	camera_->SnapTo(player_->GetPosition());
@@ -68,7 +75,10 @@ void StageScene::Update() {
 	// (3) 砲弾の発射・飛翔・命中
 	bulletManager_->Update();
 
-	// (4) 地形・城・砲台プロップ・グリッド
+	// (3.5) 敵の攻撃（ベルトコンベア→大砲→自陣の床）
+	enemyConveyor_->Update();
+
+	// (4) 地形・床(HP)・大砲プロップ・グリッド
 	environment_->Update();
 
 	// (5) カメラ：砲台に近づいたら自動ズームアウト（TAB長押しでも可）。
@@ -89,6 +99,7 @@ void StageScene::Update() {
 void StageScene::Object3DDraw() {
 	environment_->Draw();
 	bulletManager_->Draw();
+	enemyConveyor_->Draw();
 	itemField_->Draw();
 	player_->Draw();
 }
@@ -105,16 +116,24 @@ void StageScene::ParticleDraw() {}
 void StageScene::ImGuiDraw() {
 #ifdef USE_IMGUI
 	if (ImGuiManager::GetInstance()->BeginPanel("Stage")) {
-		ImGui::TextWrapped("見下ろしステージ(自陣/敵陣)。WASD移動 / E=拾う(手ぶら)・砲台が近ければ装填・工作台へ載せる・その他は破棄(手持ち) / SPACE=発射 / 砲台に近づくと自動ズームアウト(TAB長押しでも可) / F2デバッグカメラ。");
+		ImGui::TextWrapped("見下ろしステージ(自陣/敵陣)。WASD移動 / E=拾う(手ぶら)・大砲が近ければ装填・工作台へ載せる・その他は破棄(手持ち) / SPACE=発射 / 大砲に近づくと自動ズームアウト(TAB長押しでも可) / F2デバッグカメラ。");
 		ImGui::Separator();
 
-		// 砲台と敵の城の状態。
-		game::Castle* enemyCastle = environment_->GetEnemyCastle();
-		ImGui::Text("砲台 : %s / 場の弾 : %d",
+		// 大砲と床(HP)の状態。床＝HP。敵の攻撃はベルトコンベアから。
+		ImGui::Text("大砲 : %s / 場の弾 : %d",
 		            bulletManager_->HasPending() ? "装填済み(SPACEで発射)" : "空(Rで装填)",
 		            bulletManager_->ActiveCount());
-		ImGui::Text("敵の城 : HP %.1f / %s", enemyCastle->GetHP(),
-		            enemyCastle->IsPoisoned() ? "毒状態" : "正常");
+		game::Field* selfF = environment_->GetSelfField();
+		game::Field* enemyF = environment_->GetEnemyField();
+		ImGui::Text("自陣の床HP : %.0f / %.0f (%.0f%%)%s", selfF->GetHP(), selfF->GetMaxHP(),
+		            selfF->GetHPRatio() * 100.0f, selfF->IsCollapsing() ? " 崩壊!" : "");
+		ImGui::Text("敵陣の床HP : %.0f / %.0f (%.0f%%)%s", enemyF->GetHP(), enemyF->GetMaxHP(),
+		            enemyF->GetHPRatio() * 100.0f, enemyF->IsCollapsing() ? " 崩壊!" : "");
+		ImGui::Text("敵コンベア : 搬送中 %d / 大砲[胴%s 頭%s] / 敵弾 %d 発",
+		            enemyConveyor_->PartCount(),
+		            enemyConveyor_->HasBody() ? "○" : "×",
+		            enemyConveyor_->HasHead() ? "○" : "×",
+		            enemyConveyor_->BulletCount());
 		ImGui::Separator();
 
 		// アイテム/クラフトの状態表示。
@@ -153,6 +172,7 @@ void StageScene::ImGuiDraw() {
 
 	player_->DrawImGui();
 	camera_->DrawImGui();
+	enemyConveyor_->DrawImGui();
 #endif
 }
 

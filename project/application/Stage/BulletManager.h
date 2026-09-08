@@ -10,7 +10,7 @@ namespace TuboEngine { class Camera; class Object3d; }
 namespace game {
 
 class Player;
-class Castle;
+class Field;
 
 // =============================================================================
 //  BulletManager ── 砲台と砲弾の運用をまとめる。
@@ -24,10 +24,12 @@ class Castle;
 // =============================================================================
 class BulletManager {
 public:
-	// muzzle      : 弾の発射始点（砲口）
-	// enemyCastle : 弾の的。命中時に OnHit を呼ぶ（借用）。
+	// muzzle      : 弾の発射始点（自陣大砲の砲口）
+	// enemyField  : 着弾ダメージを与える相手フィールド（床＝HP。借用）。
+	// target      : 弾の的（相手フィールド中央の大砲位置）。
 	void Initialize(TuboEngine::Camera* camera,
-	                const TuboEngine::Math::Vector3& muzzle, Castle* enemyCastle);
+	                const TuboEngine::Math::Vector3& muzzle, Field* enemyField,
+	                const TuboEngine::Math::Vector3& target);
 
 	// E相当：手持ちが砲弾で砲台が近ければ砲口に装填する。装填できたら true。
 	//  ・true のときは E を消費済みなので、呼び出し側はアイテム操作を行わない。
@@ -44,7 +46,8 @@ public:
 private:
 	TuboEngine::Camera* camera_ = nullptr;
 	TuboEngine::Math::Vector3 muzzle_{0.0f, 0.0f, 0.0f};
-	Castle* enemyCastle_ = nullptr; // 借用（所有は StageEnvironment）
+	TuboEngine::Math::Vector3 target_{0.0f, 0.0f, 0.0f}; // 相手大砲(中央)＝着弾点
+	Field* enemyField_ = nullptr; // 借用（所有は StageEnvironment）。床にダメージを与える。
 
 	std::unique_ptr<Cannon> cannon_;                     // 撃つ/撃たないフラグ装置
 	std::unique_ptr<TuboEngine::Object3d> cannonRound_;  // Cannon::Update 参照用ダミー弾

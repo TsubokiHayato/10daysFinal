@@ -96,6 +96,9 @@
     <ClCompile Include="application\Stage\BulletManager.cpp">
       <Filter>application\scene\member</Filter>
     </ClCompile>
+    <ClCompile Include="application\Stage\EnemyConveyor.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
     <ClCompile Include="application\Stage\ItemField.cpp">
       <Filter>application\scene\member</Filter>
     </ClCompile>
@@ -176,6 +179,9 @@
       <Filter>application\scene\member</Filter>
     </ClInclude>
     <ClInclude Include="application\Stage\BulletManager.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\EnemyConveyor.h">
       <Filter>application\scene\member</Filter>
     </ClInclude>
     <ClInclude Include="application\Stage\ItemField.h">
