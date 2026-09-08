@@ -90,6 +90,21 @@
       <Filter>application\scene\member</Filter>
     </ClCompile>
     <ClCompile Include="application\Stage\VisualManager.cpp" />
+    <ClCompile Include="application\Stage\StageEnvironment.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\BulletManager.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\EnemyConveyor.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\ItemField.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\StageCameraController.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FadeScreen.h" />
@@ -157,5 +172,23 @@
       <Filter>application\scene\member</Filter>
     </ClInclude>
     <ClInclude Include="application\Stage\VisualManager.h" />
+    <ClInclude Include="application\Stage\StageLayout.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\StageEnvironment.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\BulletManager.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\EnemyConveyor.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\ItemField.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\StageCameraController.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -31,7 +31,7 @@ void VisualManager::Shake(float duration, float intensity) {
 }
 
 void VisualManager::Update() {
-
+	basePosition_ = camera_->GetTranslate();
 	if (!isShaking_ || !camera_) {
 		return;
 	}

@@ -35,6 +35,17 @@ public:
 	float GetHalfZ() const { return halfZ_; }
 	const TuboEngine::Math::Vector3& GetCenter() const { return center_; }
 
+	// ── 床＝HP ───────────────────────────────────────────────
+	//  worldPos を中心に radius 内の床タイルへ damage を与える（距離で減衰）。
+	//  被弾したタイルは色が青→赤へ寄り、フィールド総HPが0になると崩壊し始める。
+	void ApplyDamage(const TuboEngine::Math::Vector3& worldPos, float damage, float radius);
+
+	float GetHP() const { return hp_; }
+	float GetMaxHP() const { return maxHp_; }
+	float GetHPRatio() const { return maxHp_ > 0.0f ? hp_ / maxHp_ : 0.0f; }
+	bool IsCollapsing() const { return collapsing_; } // 崩壊アニメ中
+	bool IsCollapsed() const { return collapsed_; }   // 崩壊完了
+
 private:
 	// 壁セグメントを1枚追加するヘルパ
 	void AddWall(TuboEngine::Camera* camera,
@@ -46,6 +57,20 @@ private:
 private:
 	std::vector<std::unique_ptr<TuboEngine::Object3d>> floor_; // 床タイル
 	std::vector<std::unique_ptr<TuboEngine::Object3d>> walls_; // 外周壁
+
+	// 床タイルと並列に持つHP・見た目・崩壊アニメ用データ（index が floor_ と対応）。
+	std::vector<TuboEngine::Math::Vector4> tileBase_; // 健康時の元色（市松）
+	std::vector<float> tileHp_;                        // タイルごとの残HP
+	std::vector<TuboEngine::Math::Vector3> tileHome_;  // 元位置（被弾判定・崩壊起点）
+	std::vector<TuboEngine::Math::Vector3> tileVel_;   // 崩壊落下速度
+	std::vector<TuboEngine::Math::Vector3> tileSpin_;  // 崩壊回転速度
+
+	float tileMaxHp_ = 0.0f; // タイル1枚のHP上限
+	float hp_ = 0.0f;        // フィールド総HP（= 全タイルHPの合計）
+	float maxHp_ = 0.0f;     // フィールド総HP上限
+	bool collapsing_ = false; // 崩壊アニメ中
+	bool collapsed_ = false;  // 崩壊完了
+	float collapseTimer_ = 0.0f;
 
 	// フィールドの広さ設定
 	int cols_ = 8;          // X方向のタイル数
