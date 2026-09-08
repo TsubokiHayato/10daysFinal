@@ -9,6 +9,7 @@
 #include "Stage/StageCameraController.h"
 #include "Stage/VisualManager.h"
 #include "Stage/ItemDisplay.h"
+#include "Stage/Tutorial.h"
 #include <memory>
 
 // =============================================================================
@@ -49,4 +50,5 @@ private:
 	VisualManager* visualManager_ = nullptr;
 	// アイテムの情報を表示するUIクラス。プレイヤーがアイテムを持つと現れる
 	std::unique_ptr <game::ItemDisplay> itemdisplay_;
+	std::unique_ptr<Tutorial> tutorial_;
 };

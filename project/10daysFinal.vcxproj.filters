@@ -108,6 +108,7 @@
     <ClCompile Include="application\Stage\ItemDisplay.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
+    <ClCompile Include="application\Stage\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FadeScreen.h" />
@@ -196,5 +197,6 @@
     <ClInclude Include="application\Stage\ItemDisplay.h">
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
+    <ClInclude Include="application\Stage\Tutorial.h" />
   </ItemGroup>
 </Project>

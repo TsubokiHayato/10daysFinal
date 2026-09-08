@@ -72,6 +72,7 @@ void ItemField::HandleInteraction(Player* player) {
 			if (Dist2XZ(pp, workbench_->GetPosition()) < kBenchRange * kBenchRange) {
 				deposited = workbench_->TryDeposit(player->GetCarried());
 				if (deposited) player->SetCarried(nullptr);
+				tutorialFlagCarried_ = true;
 			}
 			if (!deposited) {
 				// 手持ち→その場の地面に破棄する。
@@ -102,6 +103,7 @@ void ItemField::Update() {
 	if (workbench_->IsReady()) {
 		ShellStats stats = workbench_->Combine(); // 入力2つを消費
 		SpawnShell(stats, workbench_->GetOutputPosition());
+		tutorialFlagCreate_ = true;
 	}
 
 	workbench_->Update();
