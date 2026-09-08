@@ -54,6 +54,10 @@ private:
 
 	// 大砲プロップ（各フィールド中央・見た目のみ。撃つロジックは別システム）。
 	std::vector<std::unique_ptr<TuboEngine::Object3d>> props_;
+	TuboEngine::Object3d* selfCannonProp_ = nullptr;  // props_ が所有（自陣中央）
+	TuboEngine::Object3d* enemyCannonProp_ = nullptr; // props_ が所有（敵陣中央）
+	Collapser selfCannonFall_;  // 自陣の床崩壊時に自陣大砲も落とす
+	Collapser enemyCannonFall_; // 敵陣の床崩壊時に敵陣大砲も落とす
 
 	TuboEngine::Math::Vector3 selfCannonPos_{0.0f, 0.0f, 0.0f};  // 自陣大砲(中央)
 	TuboEngine::Math::Vector3 enemyCannonPos_{0.0f, 0.0f, 0.0f}; // 敵陣大砲(中央)

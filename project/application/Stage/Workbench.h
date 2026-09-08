@@ -40,6 +40,9 @@ public:
 	Item* GetBodySlot() const { return bodySlot_; }
 	Item* GetHeadSlot() const { return headSlot_; }
 
+	// 台の見た目 Object3d（崩落演出などで外部から動かすとき用）。
+	TuboEngine::Object3d* GetTable() const { return table_.get(); }
+
 	void SetCamera(TuboEngine::Camera* camera);
 
 private:

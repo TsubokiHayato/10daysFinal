@@ -25,12 +25,6 @@ constexpr float kBeltY = 0.30f;   // ベルト表面の高さ
 constexpr float kPartY = 1.15f;   // ベルト上を流れるパーツの中心高さ
 constexpr float kBeltHalfW = 1.30f; // ベルト半幅(X)
 
-// 敵の砲弾は「すべて同じ」固定ステータス。プレイヤー弾より遅くする。
-//  speed=0.4 → 大砲間の距離(約60)で着弾まで約300フレーム(≒5秒)かかる。
-constexpr float kEnemyDamage = 14.0f;
-constexpr float kEnemyBlast = 1.5f;
-constexpr float kEnemyShellSpeed = 0.4f;
-
 Object3d* AddObj(std::vector<std::unique_ptr<Object3d>>& into, TuboEngine::Camera* cam,
                  const std::string& model, const Math::Vector3& pos,
                  const Math::Vector3& rot, const Math::Vector3& scale,
@@ -168,19 +162,15 @@ void EnemyConveyor::Deposit(Part& part) {
 }
 
 void EnemyConveyor::Fire() {
-	// 敵弾はすべて同じ固定ステータス（プレイヤー弾より遅い）。
+	// 敵弾はすべて同じ。標準パーツ(標準胴+通常弾頭)を合成した“標準的なプレイヤー弾”と
+	// 同じステータスにするので、弾速・弧＝軌道がプレイヤーの弾と同じになる。
 	//  胴＋頭が大砲に揃ったことが発射条件（そろえる過程は工作と同じ）。
-	ShellStats stats;
-	stats.damage = kEnemyDamage;
-	stats.speed = kEnemyShellSpeed;
-	stats.blast = kEnemyBlast;
-	stats.weight = 1.0f;
-	stats.status = Status_None;
+	ShellStats stats = CombineStats(BodyDefs().front().stats, HeadDefs().front().stats);
 
-	// 自陣大砲(中央)そのものを狙う。着地点を固定して自弾と同じ線上を通し、
-	// 空中で相殺できるようにする。
+	// 自陣大砲(中央)そのものを狙う。着地点を固定して自弾と同じ線上を通す。
+	// 発射高さもプレイヤー砲口(+1.5)に合わせ、弾道がプレイヤー弾の左右反転になるようにする。
 	const Math::Vector3 target = target_;
-	const Math::Vector3 start = beltEnd_ + Math::Vector3{0.0f, 1.6f, 0.0f};
+	const Math::Vector3 start = beltEnd_ + Math::Vector3{0.0f, 1.5f, 0.0f};
 
 	auto bullet = std::make_unique<Bullet>();
 	bullet->Initialize(camera_, stats, start, target);
@@ -195,6 +185,24 @@ void EnemyConveyor::Fire() {
 }
 
 void EnemyConveyor::Update() {
+	// 敵陣の床が崩壊し始めたら、ベルト・ゲート・搬送中パーツ・装填パーツも一緒に落とす。
+	if (enemyField_ && enemyField_->IsCollapsing()) {
+		if (!beltFall_.Started()) {
+			for (auto& obj : belt_) beltFall_.Add(obj.get());
+			for (auto& p : parts_) beltFall_.Add(p.model.get());
+			if (bodyMark_) beltFall_.Add(bodyMark_.get());
+			if (headMark_) beltFall_.Add(headMark_.get());
+		}
+		beltFall_.Start();
+		beltFall_.Update();
+		// 飛翔中の弾は最後まで飛ばして掃除だけ続ける。
+		for (auto& b : bullets_) b->Update();
+		bullets_.erase(std::remove_if(bullets_.begin(), bullets_.end(),
+		                              [](const std::unique_ptr<Bullet>& b) { return !b->IsActive(); }),
+		               bullets_.end());
+		return;
+	}
+
 	// 敵の攻撃が無効、または相手(自陣)の床が崩壊したら攻撃を止める。
 	const bool active = params_.enabled &&
 	                    (playerField_ == nullptr || !playerField_->IsCollapsing());

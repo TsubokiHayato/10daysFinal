@@ -48,6 +48,9 @@ public:
 	bool IsActive() const { return active_; }
 	void SetActive(bool a) { active_ = a; }
 
+	// 見た目の Object3d（崩落演出などで外部から動かすとき用）。
+	TuboEngine::Object3d* GetModel() const { return model_.get(); }
+
 	void SetCamera(TuboEngine::Camera* camera);
 
 private:
