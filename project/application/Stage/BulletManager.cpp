@@ -6,18 +6,12 @@
 #include "Object3d.h"
 #include "Camera.h"
 #include "Input.h"
-#include <cstdlib>
 
 using namespace TuboEngine;
 
 namespace game {
 
 using namespace game::layout;
-
-namespace {
-// [-1,1] の擬似乱数（着弾を大砲中央付近にばらけさせる用）。
-float Rand11() { return (static_cast<float>(std::rand()) / RAND_MAX) * 2.0f - 1.0f; }
-} // namespace
 
 void BulletManager::Initialize(TuboEngine::Camera* camera,
                                const Math::Vector3& muzzle, Field* enemyField,
@@ -45,10 +39,9 @@ bool BulletManager::TryLoad(Player* player) {
 	// 砲台が近くにあること。
 	if (Dist2XZ(player->GetPosition(), muzzle_) >= kCannonRange * kCannonRange) return false;
 
-	// 弾は「全ステータス＋的」を持って生まれる。的は相手大砲(中央)付近の床。
-	//  毎回ど真ん中だと同じタイルばかり削れるので、中央付近に少しばらけさせる。
-	const Math::Vector3 target = target_ + Math::Vector3{Rand11() * kFloorScatter, 0.0f,
-	                                                     Rand11() * kFloorScatter};
+	// 弾は「全ステータス＋的」を持って生まれる。的は相手大砲(中央)そのもの。
+	//  着地点を固定することで自弾・敵弾が同じ線上を通り、空中で相殺できる。
+	const Math::Vector3 target = target_;
 	auto bullet = std::make_unique<Bullet>();
 	bullet->Initialize(camera_, carried->GetStats(), muzzle_, target);
 	pending_ = bullet.get();      // 発射待ち（Fireされるまで砲口で静止）
@@ -93,6 +86,14 @@ void BulletManager::Update() {
 
 void BulletManager::Draw() {
 	for (auto& b : bullets_) b->Draw();
+}
+
+std::vector<Bullet*> BulletManager::GetFlyingBullets() {
+	std::vector<Bullet*> out;
+	for (auto& b : bullets_) {
+		if (b->IsActive() && b->IsFired()) out.push_back(b.get());
+	}
+	return out;
 }
 
 } // namespace game

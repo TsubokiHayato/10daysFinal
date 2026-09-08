@@ -43,6 +43,9 @@ public:
 	bool HasPending() const { return pending_ != nullptr; }
 	int ActiveCount() const { return static_cast<int>(bullets_.size()); }
 
+	// 発射済み・飛翔中の弾を集める（弾同士の空中相殺に使う。借用ポインタ）。
+	std::vector<Bullet*> GetFlyingBullets();
+
 private:
 	TuboEngine::Camera* camera_ = nullptr;
 	TuboEngine::Math::Vector3 muzzle_{0.0f, 0.0f, 0.0f};

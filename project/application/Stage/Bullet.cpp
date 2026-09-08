@@ -9,7 +9,7 @@ namespace game {
 
 namespace {
 constexpr float kMinDuration = 45.0f;  // 着弾までの最短フレーム
-constexpr float kMaxDuration = 240.0f; // 着弾までの最長フレーム
+constexpr float kMaxDuration = 360.0f; // 着弾までの最長フレーム(遅い敵弾=約5秒も許容)
 } // namespace
 
 // clamp（<algorithm>を増やさない軽量版）。

@@ -41,7 +41,9 @@ constexpr float kTileMaxHP = 20.0f;           // 床タイル1枚あたりのHP
 constexpr float kFloorHitBaseRadius = 4.5f;   // 着弾ダメージが及ぶ基本半径
 constexpr float kFloorHitBlastRadius = 1.4f;  // 弾のblast1あたりの追加半径
 constexpr float kPlayerFloorDmgMul = 4.0f;    // プレイヤー弾→床ダメージ倍率
-constexpr float kFloorScatter = 7.0f;         // 着弾を大砲中心付近にばらけさせる幅
+
+// 弾同士の空中相殺：この距離まで近づいたら、強さに関係なく双方を打ち消す。
+constexpr float kBulletCancelRadius = 3.0f;
 
 } // namespace game::layout
 

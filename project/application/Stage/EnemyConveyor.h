@@ -35,7 +35,6 @@ public:
 		float floorDamageMul = 4.0f;  // 合成威力→床ダメージ倍率
 		float hitBaseRadius = 4.5f;   // 着弾ダメージの基本半径
 		float hitBlastRadius = 1.4f;  // 弾のblast1あたりの追加半径
-		float scatter = 7.0f;         // 着弾を大砲中央付近にばらけさせる幅
 	};
 
 	// camera     : 描画に使う主カメラ
@@ -65,6 +64,9 @@ public:
 	int BulletCount() const { return static_cast<int>(bullets_.size()); }
 	bool HasBody() const { return hasBody_; }
 	bool HasHead() const { return hasHead_; }
+
+	// 飛翔中の敵弾を集める（弾同士の空中相殺に使う。借用ポインタ）。
+	std::vector<Bullet*> GetFlyingBullets();
 
 private:
 	// ベルト上を流れるパーツ1つ（胴 or 頭）。見た目は図鑑(PartDef)から作る。

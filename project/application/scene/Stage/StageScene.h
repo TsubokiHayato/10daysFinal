@@ -35,6 +35,9 @@ public:
 	}
 
 private:
+	// 飛翔中のプレイヤー弾と敵弾が接触したら、強さに関係なく双方を打ち消す。
+	void ResolveBulletClashes();
+
 	std::unique_ptr<game::StageCameraController> camera_;
 	std::unique_ptr<game::StageEnvironment> environment_;
 	std::unique_ptr<game::Player> player_;

@@ -3,7 +3,6 @@
 #include "Stage/Field.h"
 #include "Camera.h"
 #include <algorithm>
-#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <externals/nlohmann/json.hpp>
@@ -26,8 +25,11 @@ constexpr float kBeltY = 0.30f;   // ベルト表面の高さ
 constexpr float kPartY = 1.15f;   // ベルト上を流れるパーツの中心高さ
 constexpr float kBeltHalfW = 1.30f; // ベルト半幅(X)
 
-int RandInt(int n) { return n > 0 ? std::rand() % n : 0; }
-float Rand11() { return (static_cast<float>(std::rand()) / RAND_MAX) * 2.0f - 1.0f; }
+// 敵の砲弾は「すべて同じ」固定ステータス。プレイヤー弾より遅くする。
+//  speed=0.4 → 大砲間の距離(約60)で着弾まで約300フレーム(≒5秒)かかる。
+constexpr float kEnemyDamage = 14.0f;
+constexpr float kEnemyBlast = 1.5f;
+constexpr float kEnemyShellSpeed = 0.4f;
 
 Object3d* AddObj(std::vector<std::unique_ptr<Object3d>>& into, TuboEngine::Camera* cam,
                  const std::string& model, const Math::Vector3& pos,
@@ -125,17 +127,16 @@ void EnemyConveyor::BuildBelt() {
 }
 
 void EnemyConveyor::SpawnPart() {
-	// 胴→頭を交互に出す（大砲で必ず1対そろうように）。図鑑からランダムに選ぶ。
+	// 胴→頭を交互に出す（大砲で必ず1対そろうように）。
+	// 敵はすべて同じ弾にするので、図鑑の先頭(標準の胴・頭)を固定で使う。
 	Part p;
 	if (nextIsBody_) {
-		const std::vector<PartDef>& defs = BodyDefs();
-		const PartDef& def = defs[RandInt(static_cast<int>(defs.size()))];
+		const PartDef& def = BodyDefs().front();
 		p.model = MakePartObj(camera_, def);
 		p.stats = def.stats;
 		p.category = Category::Body;
 	} else {
-		const std::vector<PartDef>& defs = HeadDefs();
-		const PartDef& def = defs[RandInt(static_cast<int>(defs.size()))];
+		const PartDef& def = HeadDefs().front();
 		p.model = MakePartObj(camera_, def);
 		p.stats = def.stats;
 		p.category = Category::Head;
@@ -167,12 +168,18 @@ void EnemyConveyor::Deposit(Part& part) {
 }
 
 void EnemyConveyor::Fire() {
-	// プレイヤーと同じ合成ルールで砲弾ステータスを作る。
-	ShellStats stats = CombineStats(bodyStats_, headStats_);
+	// 敵弾はすべて同じ固定ステータス（プレイヤー弾より遅い）。
+	//  胴＋頭が大砲に揃ったことが発射条件（そろえる過程は工作と同じ）。
+	ShellStats stats;
+	stats.damage = kEnemyDamage;
+	stats.speed = kEnemyShellSpeed;
+	stats.blast = kEnemyBlast;
+	stats.weight = 1.0f;
+	stats.status = Status_None;
 
-	// 自陣大砲(中央)付近へ、少しばらけさせて着弾させる。
-	const Math::Vector3 target = target_ + Math::Vector3{Rand11() * params_.scatter, 0.0f,
-	                                                     Rand11() * params_.scatter};
+	// 自陣大砲(中央)そのものを狙う。着地点を固定して自弾と同じ線上を通し、
+	// 空中で相殺できるようにする。
+	const Math::Vector3 target = target_;
 	const Math::Vector3 start = beltEnd_ + Math::Vector3{0.0f, 1.6f, 0.0f};
 
 	auto bullet = std::make_unique<Bullet>();
@@ -257,6 +264,14 @@ void EnemyConveyor::Draw() {
 	for (auto& b : bullets_) b->Draw();
 }
 
+std::vector<Bullet*> EnemyConveyor::GetFlyingBullets() {
+	std::vector<Bullet*> out;
+	for (auto& b : bullets_) {
+		if (b->IsActive() && b->IsFired()) out.push_back(b.get());
+	}
+	return out;
+}
+
 // ── JSON 保存 ──────────────────────────────────────────────
 bool EnemyConveyor::SaveParams(const std::string& path) const {
 	json root;
@@ -266,7 +281,6 @@ bool EnemyConveyor::SaveParams(const std::string& path) const {
 	root["floorDamageMul"] = params_.floorDamageMul;
 	root["hitBaseRadius"] = params_.hitBaseRadius;
 	root["hitBlastRadius"] = params_.hitBlastRadius;
-	root["scatter"] = params_.scatter;
 
 	try {
 		std::filesystem::path p(path);
@@ -298,7 +312,6 @@ bool EnemyConveyor::LoadParams(const std::string& path) {
 	params_.floorDamageMul = root.value("floorDamageMul", params_.floorDamageMul);
 	params_.hitBaseRadius = root.value("hitBaseRadius", params_.hitBaseRadius);
 	params_.hitBlastRadius = root.value("hitBlastRadius", params_.hitBlastRadius);
-	params_.scatter = root.value("scatter", params_.scatter);
 	return true;
 }
 
@@ -314,7 +327,6 @@ void EnemyConveyor::DrawImGui() {
 		ImGui::DragFloat("床ダメージ倍率", &params_.floorDamageMul, 0.1f, 0.0f, 20.0f, "%.2f");
 		ImGui::DragFloat("着弾半径", &params_.hitBaseRadius, 0.1f, 0.5f, 20.0f, "%.2f");
 		ImGui::DragFloat("爆発半径係数", &params_.hitBlastRadius, 0.1f, 0.0f, 10.0f, "%.2f");
-		ImGui::DragFloat("着弾ばらけ幅", &params_.scatter, 0.1f, 0.0f, 20.0f, "%.2f");
 
 		ImGui::Separator();
 		ImGui::Text("状態 : 搬送中 %d / 大砲[胴%s 頭%s] / 敵弾 %d 発",

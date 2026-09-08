@@ -6,6 +6,8 @@
 #include "Input.h"
 #include "TextManager.h"
 #include "Stage/StageLayout.h"
+#include "Stage/Bullet.h"
+#include <vector>
 
 #ifdef USE_IMGUI
 #include "externals/imgui/imgui.h"
@@ -78,6 +80,9 @@ void StageScene::Update() {
 	// (3.5) 敵の攻撃（ベルトコンベア→大砲→自陣の床）
 	enemyConveyor_->Update();
 
+	// (3.6) 空中での弾の相殺（自弾と敵弾が接触したら、どちらも打ち消す）
+	ResolveBulletClashes();
+
 	// (4) 地形・床(HP)・大砲プロップ・グリッド
 	environment_->Update();
 
@@ -91,6 +96,41 @@ void StageScene::Update() {
 
 	TuboEngine::TextManager::GetInstance()->UpdateAll();
 	visualManager_->Update();
+}
+
+// =============================================================================
+//  弾同士の空中相殺
+//   ・飛翔中のプレイヤー弾と敵弾が kBulletCancelRadius 内で接触したら、
+//     強さに関係なく双方を消す（着地点を固定しているので同じ線上で交差する）。
+// =============================================================================
+void StageScene::ResolveBulletClashes() {
+	std::vector<game::Bullet*> mine = bulletManager_->GetFlyingBullets();
+	std::vector<game::Bullet*> foe = enemyConveyor_->GetFlyingBullets();
+	if (mine.empty() || foe.empty()) return;
+
+	const float r2 = game::layout::kBulletCancelRadius * game::layout::kBulletCancelRadius;
+	bool anyCancel = false;
+
+	for (game::Bullet* a : mine) {
+		if (!a->IsActive()) continue;
+		for (game::Bullet* b : foe) {
+			if (!b->IsActive()) continue;
+
+			// 3D距離で接触判定。近ければ双方消滅。
+			const TuboEngine::Math::Vector3& pa = a->GetPosition();
+			const TuboEngine::Math::Vector3& pb = b->GetPosition();
+			float dx = pa.x - pb.x, dy = pa.y - pb.y, dz = pa.z - pb.z;
+			if (dx * dx + dy * dy + dz * dz > r2) continue;
+
+			a->Deactivate();
+			b->Deactivate();
+			anyCancel = true;
+			break; // a は消えたので次の a へ
+		}
+	}
+
+	// 相殺が起きたら軽く画面を揺らして手応えを出す。
+	if (anyCancel) visualManager_->Shake(0.25f, 1.2f);
 }
 
 // =============================================================================
