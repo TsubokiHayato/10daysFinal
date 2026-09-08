@@ -57,6 +57,10 @@ void StageScene::Initialize() {
 
 	TextManager::GetInstance()->LoadTextLayout("Resources/Text/StageTutorial.json");
 
+	// アイテムのUI表示クラス
+	itemdisplay_ = std::make_unique<game::ItemDisplay>();
+	itemdisplay_->Initialize();
+
 	visualManager_ = VisualManager::GetInstance();
 	visualManager_->Initialize(cam);
 }
@@ -92,9 +96,11 @@ void StageScene::Update() {
 		game::layout::kCannonZoomRange * game::layout::kCannonZoomRange;
 	camera_->Update(player_->GetPosition(), nearCannon);
 
-
-
 	TuboEngine::TextManager::GetInstance()->UpdateAll();
+
+	// (6) アイテム情報のUI表示
+	itemdisplay_->Update(player_->GetCarried());
+
 	visualManager_->Update();
 }
 
@@ -145,6 +151,8 @@ void StageScene::Object3DDraw() {
 }
 
 void StageScene::SpriteDraw() {
+	itemdisplay_->Draw();
+
 	TuboEngine::TextManager::GetInstance()->DrawAll();
 }
 

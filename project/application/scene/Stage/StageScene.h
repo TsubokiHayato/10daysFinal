@@ -8,6 +8,7 @@
 #include "Stage/EnemyConveyor.h"
 #include "Stage/StageCameraController.h"
 #include "Stage/VisualManager.h"
+#include "Stage/ItemDisplay.h"
 #include <memory>
 
 // =============================================================================
@@ -46,4 +47,6 @@ private:
 	std::unique_ptr<game::EnemyConveyor> enemyConveyor_;
 
 	VisualManager* visualManager_ = nullptr;
+	// アイテムの情報を表示するUIクラス。プレイヤーがアイテムを持つと現れる
+	std::unique_ptr <game::ItemDisplay> itemdisplay_;
 };
