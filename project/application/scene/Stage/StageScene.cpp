@@ -17,35 +17,35 @@
 using namespace TuboEngine;
 
 namespace {
-// 各陣フィールドの中心 |X|。自陣=-, 敵陣=+。中央に谷ができる距離にする。
-constexpr float kFieldOffsetX = 30.0f;
+	// 各陣フィールドの中心 |X|。自陣=-, 敵陣=+。中央に谷ができる距離にする。
+	constexpr float kFieldOffsetX = 30.0f;
 
-// 陣営の床色(市松2色)。
-constexpr Math::Vector4 kSelfFloorA = {0.30f, 0.42f, 0.66f, 1.0f};
-constexpr Math::Vector4 kSelfFloorB = {0.22f, 0.32f, 0.54f, 1.0f};
-constexpr Math::Vector4 kEnemyFloorA = {0.62f, 0.32f, 0.34f, 1.0f};
-constexpr Math::Vector4 kEnemyFloorB = {0.50f, 0.24f, 0.26f, 1.0f};
+	// 陣営の床色(市松2色)。
+	constexpr Math::Vector4 kSelfFloorA = { 0.30f, 0.42f, 0.66f, 1.0f };
+	constexpr Math::Vector4 kSelfFloorB = { 0.22f, 0.32f, 0.54f, 1.0f };
+	constexpr Math::Vector4 kEnemyFloorA = { 0.62f, 0.32f, 0.34f, 1.0f };
+	constexpr Math::Vector4 kEnemyFloorB = { 0.50f, 0.24f, 0.26f, 1.0f };
 
-// 城の紋章(旗代わり)色。
-constexpr Math::Vector4 kSelfColor = {0.35f, 0.55f, 1.0f, 1.0f};
-constexpr Math::Vector4 kEnemyColor = {1.0f, 0.35f, 0.32f, 1.0f};
+	// 城の紋章(旗代わり)色。
+	constexpr Math::Vector4 kSelfColor = { 0.35f, 0.55f, 1.0f, 1.0f };
+	constexpr Math::Vector4 kEnemyColor = { 1.0f, 0.35f, 0.32f, 1.0f };
 
-constexpr float kHalfPi = 1.57079633f;
+	constexpr float kHalfPi = 1.57079633f;
 
-// アイテム操作の距離。
-constexpr float kPickRange = 3.0f;      // 地面アイテムを拾える距離
-constexpr float kBenchRange = 4.5f;     // 工作台に載せられる距離
-constexpr float kCannonRange = 5.0f;    // 砲台に弾を装填できる距離
-constexpr float kItemGroundY = 0.6f;    // 落ちているアイテムの基準高さ
-constexpr float kEnemyCastleHP = 200.0f; // 敵の城のHP
+	// アイテム操作の距離。
+	constexpr float kPickRange = 3.0f;      // 地面アイテムを拾える距離
+	constexpr float kBenchRange = 4.5f;     // 工作台に載せられる距離
+	constexpr float kCannonRange = 5.0f;    // 砲台に弾を装填できる距離
+	constexpr float kItemGroundY = 0.6f;    // 落ちているアイテムの基準高さ
+	constexpr float kEnemyCastleHP = 200.0f; // 敵の城のHP
 
-float Lerp(float a, float b, float t) { return a + (b - a) * t; }
+	float Lerp(float a, float b, float t) { return a + (b - a) * t; }
 
-// XZ平面上の距離の2乗（高さは無視）。
-float Dist2XZ(const Math::Vector3& a, const Math::Vector3& b) {
-	float dx = a.x - b.x, dz = a.z - b.z;
-	return dx * dx + dz * dz;
-}
+	// XZ平面上の距離の2乗（高さは無視）。
+	float Dist2XZ(const Math::Vector3& a, const Math::Vector3& b) {
+		float dx = a.x - b.x, dz = a.z - b.z;
+		return dx * dx + dz * dz;
+	}
 } // namespace
 
 // =============================================================================
@@ -63,14 +63,14 @@ void StageScene::Initialize() {
 
 	// ② フィールド（自陣=左/-X, 敵陣=右/+X）
 	selfField_ = std::make_unique<game::Field>();
-	selfField_->Initialize(cam, {-kFieldOffsetX, 0.0f, 0.0f}, kSelfFloorA, kSelfFloorB);
+	selfField_->Initialize(cam, { -kFieldOffsetX, 0.0f, 0.0f }, kSelfFloorA, kSelfFloorB);
 	enemyField_ = std::make_unique<game::Field>();
-	enemyField_->Initialize(cam, {kFieldOffsetX, 0.0f, 0.0f}, kEnemyFloorA, kEnemyFloorB);
+	enemyField_->Initialize(cam, { kFieldOffsetX, 0.0f, 0.0f }, kEnemyFloorA, kEnemyFloorB);
 
 	// ③ 城(基地)：各陣の外側の端(谷と反対側)に建てる。
 	const float hx = selfField_->GetHalfX();
-	const Math::Vector3 enemyCastleCenter = {kFieldOffsetX + hx - 8.0f, 0.0f, 0.0f};
-	BuildCastle({-kFieldOffsetX - hx + 8.0f, 0.0f, 0.0f}, kSelfColor);  // 自陣の城(左端)
+	const Math::Vector3 enemyCastleCenter = { kFieldOffsetX + hx - 8.0f, 0.0f, 0.0f };
+	BuildCastle({ -kFieldOffsetX - hx + 8.0f, 0.0f, 0.0f }, kSelfColor);  // 自陣の城(左端)
 	BuildCastle(enemyCastleCenter, kEnemyColor);                        // 敵陣の城(右端)
 
 	// 敵の城のロジック（HP・状態異常）を城の位置に用意。弾の的にもなる。
@@ -78,20 +78,20 @@ void StageScene::Initialize() {
 	enemyCastle_->Initialize(enemyCastleCenter, kEnemyCastleHP);
 
 	// ④ 砲台：各陣の内側の端(谷側)に、相手側を向けて置く。見た目は両陣ともプロップ。
-	const Math::Vector3 selfCannonPos = {-kFieldOffsetX + hx - 6.0f, 0.0f, 0.0f};
-	AddProp("artilleryBattery/artillery battery.obj", selfCannonPos, {0.0f, -kHalfPi, 0.0f},
-	        {2.6f, 2.6f, 2.6f}, {1.0f, 1.0f, 1.0f, 1.0f});
+	const Math::Vector3 selfCannonPos = { -kFieldOffsetX + hx - 6.0f, 0.0f, 0.0f };
+	AddProp("artilleryBattery/artillery battery.obj", selfCannonPos, { 0.0f, -kHalfPi, 0.0f },
+		{ 2.6f, 2.6f, 2.6f }, { 1.0f, 1.0f, 1.0f, 1.0f });
 	enemyCannon_ = AddProp("artilleryBattery/artillery battery.obj",
-	                       {kFieldOffsetX - hx + 6.0f, 0.0f, 0.0f}, {0.0f, kHalfPi, 0.0f},
-	                       {2.6f, 2.6f, 2.6f}, {1.0f, 1.0f, 1.0f, 1.0f});
+		{ kFieldOffsetX - hx + 6.0f, 0.0f, 0.0f }, { 0.0f, kHalfPi, 0.0f },
+		{ 2.6f, 2.6f, 2.6f }, { 1.0f, 1.0f, 1.0f, 1.0f });
 
 	// 自陣の砲台は作者作の Cannon クラスを「発射フラグを持つ装置」としてロジックのみ使う。
 	//  ・Cannon::Initialize は原点に square モデルを作るが、描画はしない（見た目は上のプロップ）。
 	//  ・SPACEで isBulletFired_ が立つので、それを HandleBullets で読んで弾を発射する。
 	selfCannon_ = std::make_unique<game::Cannon>();
-	selfCannon_->Initialize(cam);
+	selfCannon_->Initialize(cam, selfCannonPos);
 	// 砲口（弾の発射始点）は砲台プロップの少し上。
-	muzzle_ = selfCannonPos + Math::Vector3{0.0f, 1.5f, 0.0f};
+	muzzle_ = selfCannonPos + Math::Vector3{ 0.0f, 1.5f, 0.0f };
 	// Cannon::Update が参照するダミー弾をセット（SPACEで null 参照しないため。描画しない）。
 	cannonRound_ = std::make_unique<Object3d>();
 	cannonRound_->Initialize("playerBullet/playerBullet.obj");
@@ -101,14 +101,14 @@ void StageScene::Initialize() {
 	// ⑤ プレイヤー。自陣の中央あたりに配置し、自陣の範囲でクランプ。
 	player_ = std::make_unique<game::Player>();
 	player_->Initialize(cam);
-	player_->SetPosition({-kFieldOffsetX, 1.0f, -selfField_->GetHalfZ() * 0.4f});
+	player_->SetPosition({ -kFieldOffsetX, 1.0f, -selfField_->GetHalfZ() * 0.4f });
 	player_->SetMoveBounds(selfField_->GetCenter(),
-	                       selfField_->GetHalfX() - 1.5f, selfField_->GetHalfZ() - 1.5f);
+		selfField_->GetHalfX() - 1.5f, selfField_->GetHalfZ() - 1.5f);
 
 	// ⑥ 工作台（製作台）。自陣の中央やや手前に置く。
 	const Math::Vector3 selfCenter = selfField_->GetCenter();
 	workbench_ = std::make_unique<game::Workbench>();
-	workbench_->Initialize(cam, {selfCenter.x, 0.0f, selfCenter.z + 4.0f});
+	workbench_->Initialize(cam, { selfCenter.x, 0.0f, selfCenter.z + 4.0f });
 
 	// ⑦ パーツを自陣にランダムに散らばらせる。
 	ScatterParts();
@@ -147,23 +147,23 @@ void StageScene::ScatterParts() {
 
 	auto randRange = [](float a, float b) {
 		return a + (b - a) * (static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX));
-	};
+		};
 	auto scatter = [&](const std::vector<game::PartDef>& defs, int perType) {
 		for (const auto& def : defs) {
 			for (int i = 0; i < perType; ++i) {
-				Math::Vector3 p = {c.x + randRange(-hx, hx), kItemGroundY, c.z + randRange(-hz, hz)};
+				Math::Vector3 p = { c.x + randRange(-hx, hx), kItemGroundY, c.z + randRange(-hz, hz) };
 				SpawnPart(def, p);
 			}
 		}
-	};
+		};
 	scatter(game::BodyDefs(), 2); // 各胴体を2個ずつ
 	scatter(game::HeadDefs(), 2); // 各頭を2個ずつ
 }
 
 // props_ に Object3d を1つ積む。
 TuboEngine::Object3d* StageScene::AddProp(const std::string& model, const Math::Vector3& pos,
-                                          const Math::Vector3& rot, const Math::Vector3& scale,
-                                          const Math::Vector4& color) {
+	const Math::Vector3& rot, const Math::Vector3& scale,
+	const Math::Vector4& color) {
 	auto obj = std::make_unique<Object3d>();
 	obj->Initialize(model);
 	obj->SetCamera(followCamera_->GetCamera());
@@ -180,21 +180,21 @@ TuboEngine::Object3d* StageScene::AddProp(const std::string& model, const Math::
 void StageScene::BuildCastle(const Math::Vector3& center, const Math::Vector4& color) {
 	const float cx = center.x, cz = center.z;
 	// 石材は白っぽく、陣営色をほんのり混ぜる。
-	Math::Vector4 stone = {Lerp(0.85f, color.x, 0.3f), Lerp(0.85f, color.y, 0.3f),
-	                       Lerp(0.85f, color.z, 0.3f), 1.0f};
+	Math::Vector4 stone = { Lerp(0.85f, color.x, 0.3f), Lerp(0.85f, color.y, 0.3f),
+						   Lerp(0.85f, color.z, 0.3f), 1.0f };
 
 	// 天守(中央) 6x10x6, 底面を地面(y=0)に合わせる。
-	AddProp("block/block.obj", {cx, 5.0f, cz}, {0, 0, 0}, {3.0f, 5.0f, 3.0f}, stone);
+	AddProp("block/block.obj", { cx, 5.0f, cz }, { 0, 0, 0 }, { 3.0f, 5.0f, 3.0f }, stone);
 
 	// 四隅の塔 2x14x2。
 	const float t = 4.0f;
-	AddProp("block/block.obj", {cx - t, 7.0f, cz - t}, {0, 0, 0}, {1.0f, 7.0f, 1.0f}, stone);
-	AddProp("block/block.obj", {cx - t, 7.0f, cz + t}, {0, 0, 0}, {1.0f, 7.0f, 1.0f}, stone);
-	AddProp("block/block.obj", {cx + t, 7.0f, cz - t}, {0, 0, 0}, {1.0f, 7.0f, 1.0f}, stone);
-	AddProp("block/block.obj", {cx + t, 7.0f, cz + t}, {0, 0, 0}, {1.0f, 7.0f, 1.0f}, stone);
+	AddProp("block/block.obj", { cx - t, 7.0f, cz - t }, { 0, 0, 0 }, { 1.0f, 7.0f, 1.0f }, stone);
+	AddProp("block/block.obj", { cx - t, 7.0f, cz + t }, { 0, 0, 0 }, { 1.0f, 7.0f, 1.0f }, stone);
+	AddProp("block/block.obj", { cx + t, 7.0f, cz - t }, { 0, 0, 0 }, { 1.0f, 7.0f, 1.0f }, stone);
+	AddProp("block/block.obj", { cx + t, 7.0f, cz + t }, { 0, 0, 0 }, { 1.0f, 7.0f, 1.0f }, stone);
 
 	// 屋根の紋章(旗代わり)。陣営色そのまま。
-	AddProp("crown/crown.obj", {cx, 11.6f, cz}, {0, 0, 0}, {2.2f, 2.2f, 2.2f}, color);
+	AddProp("crown/crown.obj", { cx, 11.6f, cz }, { 0, 0, 0 }, { 2.2f, 2.2f, 2.2f }, color);
 }
 
 // =============================================================================
@@ -229,14 +229,14 @@ void StageScene::Update() {
 	// (7) 任意：ワールドグリッド（デバッグ表示）
 	if (showGrid_) {
 		LineManager::GetInstance()->DrawGrid(
-			(kFieldOffsetX + selfField_->GetHalfX()) * 2.0f, 24, {0.0f, 0.01f, 0.0f},
-			{0.4f, 0.4f, 0.4f, 1.0f});
+			(kFieldOffsetX + selfField_->GetHalfX()) * 2.0f, 24, { 0.0f, 0.01f, 0.0f },
+			{ 0.4f, 0.4f, 0.4f, 1.0f });
 	}
 
 	TuboEngine::TextManager::GetInstance()->UpdateAll();
 
 	// (3) カメラ：基本はプレイヤー追従。overview_ の分だけ戦場中央(原点)を見渡す。
-	followCamera_->Update(player_->GetPosition(), {0.0f, 0.0f, 0.0f}, overview_);
+	followCamera_->Update(player_->GetPosition(), { 0.0f, 0.0f, 0.0f }, overview_);
 
 	// (4) F2 デバッグカメラ（主カメラを乗っ取る）。追従更新の“後”に適用する。
 	debugCamera_->Update(followCamera_->GetCamera());
@@ -279,7 +279,7 @@ void StageScene::HandleItemInteraction() {
 
 	if (drop && player_->IsCarrying()) {
 		game::Item* it = player_->GetCarried();
-		it->SetPosition({pp.x, kItemGroundY, pp.z});
+		it->SetPosition({ pp.x, kItemGroundY, pp.z });
 		it->SetState(game::Item::State::Ground);
 		player_->SetCarried(nullptr);
 	}
@@ -300,12 +300,16 @@ void StageScene::HandleBullets() {
 	const Math::Vector3 pp = player_->GetPosition();
 
 	// ── 装填：手持ちの砲弾を Bullet 化して砲口に置く（まだ発射しない）──
-	if (in->TriggerKey(DIK_R) && !pendingBullet_) {
-		game::Item* carried = player_->GetCarried();
-		if (carried && carried->GetCategory() == game::Category::Shell &&
-		    Dist2XZ(pp, muzzle_) < kCannonRange * kCannonRange) {
+
+	game::Item* carried = player_->GetCarried();
+	if (carried && carried->GetCategory() == game::Category::Shell &&
+		Dist2XZ(pp, muzzle_) < kCannonRange * kCannonRange) {
+
+		player_->SetInIconRange(true);
+
+		if (in->TriggerKey(DIK_R) && !pendingBullet_) {
 			// 弾は「全ステータス＋的」を持って生まれる。的は敵の城の少し上。
-			const Math::Vector3 target = enemyCastle_->GetPosition() + Math::Vector3{0.0f, 3.0f, 0.0f};
+			const Math::Vector3 target = enemyCastle_->GetPosition() + Math::Vector3{ 0.0f, 3.0f, 0.0f };
 			auto bullet = std::make_unique<game::Bullet>();
 			bullet->Initialize(followCamera_->GetCamera(), carried->GetStats(), muzzle_, target);
 			pendingBullet_ = bullet.get();      // 発射待ち（Fireされるまで砲口で静止）
@@ -315,6 +319,7 @@ void StageScene::HandleBullets() {
 			player_->SetCarried(nullptr);
 			// 砲台を再装填状態に戻す（前弾のフラグが残っていても撃てるように）。
 			selfCannon_->SetIsBulletFired(false);
+			selfCannon_->SetIsLoading(true);
 		}
 	}
 
@@ -340,8 +345,8 @@ void StageScene::HandleBullets() {
 
 	// 消滅した弾を掃除する。
 	bullets_.erase(std::remove_if(bullets_.begin(), bullets_.end(),
-	                              [](const std::unique_ptr<game::Bullet>& b) { return !b->IsActive(); }),
-	               bullets_.end());
+		[](const std::unique_ptr<game::Bullet>& b) { return !b->IsActive(); }),
+		bullets_.end());
 }
 
 // =============================================================================
@@ -356,6 +361,7 @@ void StageScene::Object3DDraw() {
 	workbench_->Draw();
 	for (auto& it : items_) it->Draw();
 	player_->Draw();
+	selfCannon_->Draw();
 }
 
 void StageScene::SpriteDraw() {
@@ -375,10 +381,10 @@ void StageScene::ImGuiDraw() {
 
 		// 砲台と敵の城の状態。
 		ImGui::Text("砲台 : %s / 場の弾 : %d",
-		            pendingBullet_ ? "装填済み(SPACEで発射)" : "空(Rで装填)",
-		            static_cast<int>(bullets_.size()));
+			pendingBullet_ ? "装填済み(SPACEで発射)" : "空(Rで装填)",
+			static_cast<int>(bullets_.size()));
 		ImGui::Text("敵の城 : HP %.1f / %s", enemyCastle_->GetHP(),
-		            enemyCastle_->IsPoisoned() ? "毒状態" : "正常");
+			enemyCastle_->IsPoisoned() ? "毒状態" : "正常");
 		ImGui::Separator();
 
 		// アイテム/クラフトの状態表示。
@@ -393,8 +399,8 @@ void StageScene::ImGuiDraw() {
 		game::Item* body = workbench_->GetBodySlot();
 		game::Item* head = workbench_->GetHeadSlot();
 		ImGui::Text("工作台 : 胴[%s] 頭[%s]",
-		            body ? body->GetName().c_str() : "空",
-		            head ? head->GetName().c_str() : "空");
+			body ? body->GetName().c_str() : "空",
+			head ? head->GetName().c_str() : "空");
 		ImGui::Text("地面のアイテム : %d 個 / 砲弾 : %d 個", ground, shells);
 
 		// 手持ち/直近の砲弾のステータスを見せる。

@@ -19,7 +19,7 @@ void OnoderaScene::Initialize() {
 
 	// 発射台の初期化
 	cannon_ = std::make_unique<game::Cannon>();
-	cannon_->Initialize(camera_.get());
+	cannon_->Initialize(camera_.get(), { 0.0f, 0.0f, 0.0f });
 
 	// プレイヤーの生成、初期化
 	player_ = std::make_unique<Object3d>();

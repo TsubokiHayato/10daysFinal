@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "Input.h"
 #include "Item.h"
+#include "Vector3.h"
 
 #include <cmath>
 
@@ -22,6 +23,11 @@ void Player::Initialize(TuboEngine::Camera* camera) {
 	model_->Initialize("player/Player.obj");
 	model_->SetCamera(camera);
 	model_->SetPosition(position_);
+
+	iconModel_ = std::make_unique<TuboEngine::Object3d>();
+	iconModel_->Initialize("EButton/EButton.obj");
+	iconModel_->SetCamera(camera);
+	iconModel_->SetPosition(position_);
 }
 
 void Player::SetCamera(TuboEngine::Camera* camera) {
@@ -72,10 +78,27 @@ void Player::Update() {
 	if (carried_) {
 		carried_->SetPosition({position_.x, position_.y + 2.4f, position_.z});
 	}
+
+	if (inIconRange_) {
+		iconTimer_ += 1.0f / 60.0f;
+	} else {
+		iconTimer_ -= 1.0f / 60.0f;
+	}
+
+	iconTimer_ = std::clamp(iconTimer_, 0.0f, iconMaxTime_);
+
+	iconModel_->SetModelColor({ 1.0f,1.0f,1.0f,iconTimer_ / iconMaxTime_ });
+	iconModel_->SetPosition(position_ + TuboEngine::Math::Vector3(0.0f, 4.0f, 0.0f));
+	iconModel_->SetRotation({ 0.2f,3.14f,0.0f });
+	iconModel_->Update();
+
+	inIconRange_ = false;
 }
 
 void Player::Draw() {
 	model_->Draw();
+	if (iconTimer_ <= 0.0f) return;
+	iconModel_->Draw();
 }
 
 #ifdef USE_IMGUI

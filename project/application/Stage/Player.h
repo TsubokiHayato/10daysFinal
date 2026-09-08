@@ -48,6 +48,7 @@ public:
 	void SetCarried(game::Item* item) { carried_ = item; }
 	game::Item* GetCarried() const { return carried_; }
 	bool IsCarrying() const { return carried_ != nullptr; }
+	void SetInIconRange(const bool flag) { inIconRange_ = flag; }
 
 #ifdef USE_IMGUI
 	void DrawImGui();
@@ -56,11 +57,19 @@ public:
 private:
 	std::unique_ptr<TuboEngine::Object3d> model_;
 
+	std::unique_ptr<TuboEngine::Object3d> iconModel_;
+
 	TuboEngine::Math::Vector3 position_{0.0f, 1.0f, -20.0f};
 	float moveSpeed_ = 0.25f; // 1フレームあたりの移動量
 	float yaw_ = 0.0f;        // 向き（Y軸回転）
 
 	game::Item* carried_ = nullptr; // 手持ちアイテム（借用。所有は StageScene）
+
+	float iconTimer_ = 0.0f;
+
+	float iconMaxTime_ = 0.3f;
+
+	bool inIconRange_ = false;
 
 	// フィールド境界（中心からの半分の広さ）。0以下ならクランプ無効。
 	TuboEngine::Math::Vector3 boundCenter_{0.0f, 0.0f, 0.0f}; // クランプの中心
