@@ -9,6 +9,7 @@
 #include "Stage/StageCameraController.h"
 #include "Stage/VisualManager.h"
 #include "Stage/ItemDisplay.h"
+#include "Stage/Collapser.h" // 敗北時にプレイヤーを落とす
 #include "Stage/Tutorial.h"
 #include "stage/Option.h"
 #include <memory>
@@ -44,6 +45,11 @@ private:
 	// 画面上のHP UI(PlayerHP/EnemyHPスプライト)の幅を、床HPの残り割合に合わせて更新する。
 	void UpdateHpUI();
 
+	// 敗北演出：ビネットを徐々に濃くしながら崩落を見せ、タイトルへ戻す。
+	//  ・自陣(プレイヤーの陣地)の床が崩壊し始めたら開始する。
+	void StartLoseSequence();
+	void UpdateLoseSequence(float dt);
+
 	std::unique_ptr<game::StageCameraController> camera_;
 	std::unique_ptr<game::StageEnvironment> environment_;
 	std::unique_ptr<game::Player> player_;
@@ -63,6 +69,11 @@ private:
 	// HP UI(PlayerHP/EnemyHP スプライト)の満タン時の幅。Initialize で控える。
 	float playerHpBaseW_ = 0.0f;
 	float enemyHpBaseW_ = 0.0f;
+
+	// 敗北演出の状態。
+	bool losing_ = false;      // 敗北演出中（開始したら二度と戻さない）
+	float loseTimer_ = 0.0f;   // 敗北演出の経過(秒)。ビネット強度とタイトル遷移に使う。
+	game::Collapser playerFall_; // 敗北時にプレイヤーを床と一緒に落下させる。
 	// アイテムの情報を表示するUIクラス。プレイヤーがアイテムを持つと現れる
 	std::unique_ptr <game::ItemDisplay> itemdisplay_;
 	std::unique_ptr<Tutorial> tutorial_;

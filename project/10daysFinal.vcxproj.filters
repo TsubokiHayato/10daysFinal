@@ -44,6 +44,9 @@
     <ClCompile Include="application\scene\Title\TitleScene.cpp">
       <Filter>application\scene\Title</Filter>
     </ClCompile>
+    <ClCompile Include="application\scene\Title\TitleItemRain.cpp">
+      <Filter>application\scene\Title</Filter>
+    </ClCompile>
     <ClCompile Include="application\scene\Option\OptionScene.cpp">
       <Filter>application\scene\Option</Filter>
     </ClCompile>
@@ -130,6 +133,9 @@
       <Filter>application\scene\Sample</Filter>
     </ClInclude>
     <ClInclude Include="application\scene\Title\TitleScene.h">
+      <Filter>application\scene\Title</Filter>
+    </ClInclude>
+    <ClInclude Include="application\scene\Title\TitleItemRain.h">
       <Filter>application\scene\Title</Filter>
     </ClInclude>
     <ClInclude Include="application\scene\Option\OptionScene.h">

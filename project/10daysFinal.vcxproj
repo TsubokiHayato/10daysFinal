@@ -129,6 +129,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\scene\SceneRegistration.cpp" />
     <ClCompile Include="application\scene\Sample\SampleScene.cpp" />
     <ClCompile Include="application\scene\Title\TitleScene.cpp" />
+    <ClCompile Include="application\scene\Title\TitleItemRain.cpp" />
     <ClCompile Include="application\scene\Option\OptionScene.cpp" />
     <ClCompile Include="application\scene\Stage\StageScene.cpp" />
     <ClCompile Include="application\Stage\FollowCamera.cpp" />
@@ -163,6 +164,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\scene\SceneRegistration.h" />
     <ClInclude Include="application\scene\Sample\SampleScene.h" />
     <ClInclude Include="application\scene\Title\TitleScene.h" />
+    <ClInclude Include="application\scene\Title\TitleItemRain.h" />
     <ClInclude Include="application\scene\Option\OptionScene.h" />
     <ClInclude Include="application\scene\Stage\StageScene.h" />
     <ClInclude Include="application\Stage\FollowCamera.h" />

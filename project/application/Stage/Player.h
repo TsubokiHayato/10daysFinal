@@ -44,6 +44,9 @@ public:
 
 	void SetCamera(TuboEngine::Camera* camera);
 
+	// 見た目の Object3d（敗北時の崩落演出などで外部から落下させるとき用）。
+	TuboEngine::Object3d* GetModel() const { return model_.get(); }
+
 	// 手持ちアイテム（拾う/捨てる/工作台へ載せる際に StageScene から操作する）。
 	void SetCarried(game::Item* item) { carried_ = item; }
 	game::Item* GetCarried() const { return carried_; }

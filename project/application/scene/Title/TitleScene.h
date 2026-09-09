@@ -4,6 +4,7 @@
 #include "Object3d.h" // 背景スカイボックス
 #include "Vector2.h"
 #include "FadeScreen.h" // シーン遷移フェード
+#include "TitleItemRain.h" // 背景に降るゲームオブジェクト演出
 #include <array>
 #include <memory>
 #include <string>
@@ -49,6 +50,8 @@ private:
 	
 	std::unique_ptr<TuboEngine::Object3d> background;//背景オブジェクト
 
+	std::unique_ptr<TitleItemRain> itemRain_; // ゲーム内オブジェクトが降り続ける背景演出
+
 	// Title.json からロードしたメニュー本体（TextManager 所有。ここは参照用の生ポインタ）
 	std::array<TuboEngine::TextObject*, kMenuCount> menuItems_{};
 	TuboEngine::TextObject* cursor_ = nullptr;
@@ -71,4 +74,12 @@ private:
 
 	std::unique_ptr<FadeScreen> fadeScreen_; // 入場フェードイン＋退場フェードアウト
 	int pendingScene_ = -1;                  // フェードアウト完了後に切り替える先(-1=無し)
+
+	// --- 敗北から戻ってきたときのビネット・リビール演出 ---
+	//  ・ステージで暗転したビネットが有効なままタイトルへ来た場合に true。
+	//  ・短時間で一気に明るくして（power を下げて）、最後にビネットを無効化する。
+	bool vignetteReveal_ = false; // リビール実行中か
+	float vignetteTimer_ = 0.0f;  // リビールの経過(秒)
+	// リビールの見た目を更新する。
+	void UpdateVignetteReveal(float dt);
 };
