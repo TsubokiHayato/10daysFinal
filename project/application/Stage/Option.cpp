@@ -14,7 +14,7 @@ namespace game {
 	// =============================================================================
 	void Option::Initialize() {
 		background_ = std::make_unique<Sprite>();
-		background_->Initialize("uvChecker.png");
+		background_->Initialize("sceneScreen.png");
 		background_->SetColor({ 1.0f,1.0f,1.0f,0.0f }); // 最初は明度は0で透明にする
 		background_->SetPosition({ 0.0f, 0.0f });
 		background_->SetSize({ 1280.0f, 720.0f });
@@ -38,7 +38,7 @@ namespace game {
 			"Option_Title",
 			TextManager::PresetFontNames::Best10 + "_32",
 			"タイトルへ",
-			{ 500.0f, 380.0f },
+			{ 520.0f, 380.0f },
 			{ 1.0f, 1.0f, 1.0f, 1.0f },
 			1.5f
 		);		
