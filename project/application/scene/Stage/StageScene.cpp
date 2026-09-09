@@ -58,6 +58,7 @@ void StageScene::Initialize() {
 
 	TextManager::GetInstance()->LoadTextLayout("Resources/Text/StageTutorial.json");
 
+
 	// HP UI(スプライト)の満タン幅を控える（以後は床HPの割合でこの幅を縮める）。
 	if (Sprite* s = TextManager::GetInstance()->GetSpriteByName("PlayerHP")) {
 		playerHpBaseW_ = s->GetSize().x;
@@ -65,6 +66,9 @@ void StageScene::Initialize() {
 	if (Sprite* s = TextManager::GetInstance()->GetSpriteByName("EnemyHP")) {
 		enemyHpBaseW_ = s->GetSize().x;
 	}
+	// アイテムのUI表示クラス
+	itemdisplay_ = std::make_unique<game::ItemDisplay>();
+	itemdisplay_->Initialize();
 
 	visualManager_ = VisualManager::GetInstance();
 	visualManager_->Initialize(cam);
@@ -120,11 +124,14 @@ void StageScene::Update() {
 	camera_->Update(player_->GetPosition(), nearCannon || anyCollapsing);
 
 
+	TuboEngine::TextManager::GetInstance()->UpdateAll();
+
 
 	// (6) HP UI(スプライト)を床HPに合わせて更新（UpdateAllでジオメトリに反映される前に）
 	UpdateHpUI();
+	// (6) アイテム情報のUI表示
+	itemdisplay_->Update(player_->GetCarried());
 
-	TuboEngine::TextManager::GetInstance()->UpdateAll();
 	visualManager_->Update();
 }
 
@@ -175,6 +182,8 @@ void StageScene::Object3DDraw() {
 }
 
 void StageScene::SpriteDraw() {
+	itemdisplay_->Draw();
+
 	TuboEngine::TextManager::GetInstance()->DrawAll();
 }
 

@@ -8,6 +8,7 @@
 #include "Stage/EnemyConveyor.h"
 #include "Stage/StageCameraController.h"
 #include "Stage/VisualManager.h"
+#include "Stage/ItemDisplay.h"
 #include <memory>
 
 // =============================================================================
@@ -60,4 +61,6 @@ private:
 	// HP UI(PlayerHP/EnemyHP スプライト)の満タン時の幅。Initialize で控える。
 	float playerHpBaseW_ = 0.0f;
 	float enemyHpBaseW_ = 0.0f;
+	// アイテムの情報を表示するUIクラス。プレイヤーがアイテムを持つと現れる
+	std::unique_ptr <game::ItemDisplay> itemdisplay_;
 };
