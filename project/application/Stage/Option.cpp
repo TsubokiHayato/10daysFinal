@@ -76,7 +76,7 @@ namespace game {
 
 		// オプションが開いている間の処理(フェード中は動かせない)		
 		if (isOpen_ && pendingScene_ < 0) {
-			background_->SetColor({1.0f,1.0f,1.0f,0.2f}); // 背景を薄く表示
+			background_->SetColor({1.0f,1.0f,1.0f,0.4f}); // 背景を薄く表示
 
 			// 最初の選択
 			if (selectedIndex_ == -1) {
