@@ -10,6 +10,7 @@
 #include "Stage/VisualManager.h"
 #include "Stage/ItemDisplay.h"
 #include "Stage/Tutorial.h"
+#include "stage/Option.h"
 #include <memory>
 
 // =============================================================================
@@ -40,6 +41,9 @@ private:
 	// 飛翔中のプレイヤー弾と敵弾が接触したら、強さに関係なく双方を打ち消す。
 	void ResolveBulletClashes();
 
+	// 画面上のHP UI(PlayerHP/EnemyHPスプライト)の幅を、床HPの残り割合に合わせて更新する。
+	void UpdateHpUI();
+
 	std::unique_ptr<game::StageCameraController> camera_;
 	std::unique_ptr<game::StageEnvironment> environment_;
 	std::unique_ptr<game::Player> player_;
@@ -48,7 +52,21 @@ private:
 	std::unique_ptr<game::EnemyConveyor> enemyConveyor_;
 
 	VisualManager* visualManager_ = nullptr;
+
+	// 弾同士の空中相殺(打ち消し)を有効にするか。
+	//  ・true（既定）: 自弾と敵弾が空中で接触したら双方消滅（＝打ち消し）。
+	//                  すれ違わなかった弾はそのまま相手の床に着弾してダメージを与える。
+	//  ・false         : 相殺しない（デバッグ用。着弾ダメージだけを確認したいとき）。
+	//  デバッグビルドでは ImGui のチェックボックスから切り替えられる。
+	bool bulletCancelEnabled_ = true;
+
+	// HP UI(PlayerHP/EnemyHP スプライト)の満タン時の幅。Initialize で控える。
+	float playerHpBaseW_ = 0.0f;
+	float enemyHpBaseW_ = 0.0f;
 	// アイテムの情報を表示するUIクラス。プレイヤーがアイテムを持つと現れる
 	std::unique_ptr <game::ItemDisplay> itemdisplay_;
 	std::unique_ptr<Tutorial> tutorial_;
+
+	// オプションクラス
+	std::unique_ptr<game::Option> option_;
 };

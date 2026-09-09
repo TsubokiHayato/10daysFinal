@@ -8,6 +8,7 @@
 #include "Object3d.h"     // 3D モデル描画
 #include "DebugCamera.h"  // F2 で切り替わるデバッグ用フリーカメラ
 #include "Stage/Cannon.h"       // 発射台
+#include "stage/Option.h"
 
 class OnoderaScene : public IScene {
 public:
@@ -35,4 +36,6 @@ private:
 
 	// 弾の移動速度
 	float bulletSpeed_ = 0.1f;
+
+	std::unique_ptr<game::Option> option_;
 };

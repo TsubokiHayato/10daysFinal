@@ -3,6 +3,7 @@
 #include "Vector3.h"
 #include "Stage/Bullet.h"
 #include "Stage/PartCatalog.h"
+#include "Stage/Collapser.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -106,6 +107,7 @@ private:
 	Params params_;           // 調整パラメータ
 	float spawnTimer_ = 0.0f; // 次のパーツ生成までのカウンタ
 	bool nextIsBody_ = true;  // 次に出すのが胴か頭か（交互）
+	Collapser beltFall_;      // 敵陣の床崩壊時にベルト・ゲート等も落とす
 };
 
 } // namespace game

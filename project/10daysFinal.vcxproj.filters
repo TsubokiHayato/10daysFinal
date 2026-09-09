@@ -109,6 +109,11 @@
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
     <ClCompile Include="application\Stage\Tutorial.cpp" />
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\Option.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FadeScreen.h" />
@@ -169,6 +174,9 @@
     <ClInclude Include="application\Stage\Bullet.h">
       <Filter>application\scene\member</Filter>
     </ClInclude>
+    <ClInclude Include="application\Stage\Collapser.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
     <ClInclude Include="application\Stage\Castle.h">
       <Filter>application\scene\member</Filter>
     </ClInclude>
@@ -198,5 +206,10 @@
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
     <ClInclude Include="application\Stage\Tutorial.h" />
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\Option.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

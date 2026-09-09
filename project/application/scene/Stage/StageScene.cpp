@@ -7,6 +7,7 @@
 #include "TextManager.h"
 #include "Stage/StageLayout.h"
 #include "Stage/Bullet.h"
+#include <cstdio>
 #include <vector>
 
 #ifdef USE_IMGUI
@@ -57,6 +58,14 @@ void StageScene::Initialize() {
 
 	//TextManager::GetInstance()->LoadTextLayout("Resources/Text/StageUI.json");
 
+
+	// HP UI(スプライト)の満タン幅を控える（以後は床HPの割合でこの幅を縮める）。
+	if (Sprite* s = TextManager::GetInstance()->GetSpriteByName("PlayerHP")) {
+		playerHpBaseW_ = s->GetSize().x;
+	}
+	if (Sprite* s = TextManager::GetInstance()->GetSpriteByName("EnemyHP")) {
+		enemyHpBaseW_ = s->GetSize().x;
+	}
 	// アイテムのUI表示クラス
 	itemdisplay_ = std::make_unique<game::ItemDisplay>();
 	itemdisplay_->Initialize();
@@ -66,6 +75,24 @@ void StageScene::Initialize() {
 
 	visualManager_ = VisualManager::GetInstance();
 	visualManager_->Initialize(cam);
+	// オプションクラスの初期化
+	option_ = std::make_unique<game::Option>();
+	option_->Initialize();
+}
+
+// 画面上のHP UI(スプライト)の幅を、各フィールドの床HP残量に合わせて縮める。
+//  ・PlayerHP は自陣の床HP、EnemyHP は敵陣の床HPに連動。
+//  ・アンカーが外側(左/右)に取ってあるので、幅を縮めると内側へ向かって減っていく。
+void StageScene::UpdateHpUI() {
+	TextManager* tm = TextManager::GetInstance();
+	if (Sprite* s = tm->GetSpriteByName("PlayerHP")) {
+		float ratio = environment_->GetSelfField()->GetHPRatio();
+		s->SetSize({playerHpBaseW_ * ratio, s->GetSize().y});
+	}
+	if (Sprite* s = tm->GetSpriteByName("EnemyHP")) {
+		float ratio = environment_->GetEnemyField()->GetHPRatio();
+		s->SetSize({enemyHpBaseW_ * ratio, s->GetSize().y});
+	}
 }
 
 // =============================================================================
@@ -87,20 +114,28 @@ void StageScene::Update() {
 	// (3.5) 敵の攻撃（ベルトコンベア→大砲→自陣の床）
 	enemyConveyor_->Update();
 
-	// (3.6) 空中での弾の相殺（自弾と敵弾が接触したら、どちらも打ち消す）
-	ResolveBulletClashes();
+	// (3.6) 空中での弾の相殺（有効時のみ）。無効なら相殺せず互いの床にダメージが入る。
+	if (bulletCancelEnabled_) ResolveBulletClashes();
 
 	// (4) 地形・床(HP)・大砲プロップ・グリッド
 	environment_->Update();
 
 	// (5) カメラ：砲台に近づいたら自動ズームアウト（TAB長押しでも可）。
+	//     さらに、どちらかの床HPが0になって崩壊し始めたら、強制的に全体を引く。
 	const bool nearCannon =
 		game::Dist2XZ(player_->GetPosition(), environment_->GetMuzzle()) <
 		game::layout::kCannonZoomRange * game::layout::kCannonZoomRange;
-	camera_->Update(player_->GetPosition(), nearCannon);
+	const bool anyCollapsing = environment_->GetSelfField()->IsCollapsing() ||
+	                           environment_->GetEnemyField()->IsCollapsing();
+	camera_->Update(player_->GetPosition(), nearCannon || anyCollapsing);
+
 
 	TuboEngine::TextManager::GetInstance()->UpdateAll();
+	// (5.5)　オプションの更新
+	option_->Update();
 
+	// (6) HP UI(スプライト)を床HPに合わせて更新（UpdateAllでジオメトリに反映される前に）
+	UpdateHpUI();
 	// (6) アイテム情報のUI表示
 	itemdisplay_->Update(player_->GetCarried());
 
@@ -166,6 +201,7 @@ void StageScene::SpriteDraw() {
 	tutorial_->Draw();
 
 	TuboEngine::TextManager::GetInstance()->DrawAll();
+	option_->Draw();
 }
 
 void StageScene::ParticleDraw() {}
@@ -185,15 +221,33 @@ void StageScene::ImGuiDraw() {
 		            bulletManager_->ActiveCount());
 		game::Field* selfF = environment_->GetSelfField();
 		game::Field* enemyF = environment_->GetEnemyField();
-		ImGui::Text("自陣の床HP : %.0f / %.0f (%.0f%%)%s", selfF->GetHP(), selfF->GetMaxHP(),
-		            selfF->GetHPRatio() * 100.0f, selfF->IsCollapsing() ? " 崩壊!" : "");
-		ImGui::Text("敵陣の床HP : %.0f / %.0f (%.0f%%)%s", enemyF->GetHP(), enemyF->GetMaxHP(),
-		            enemyF->GetHPRatio() * 100.0f, enemyF->IsCollapsing() ? " 崩壊!" : "");
+
+		// 床HP＝バーで表示（減りが視覚的に分かるように）。
+		char hpBuf[64];
+		// 自陣(青系バー)。
+		ImGui::Text("自陣の床HP"); ImGui::SameLine();
+		std::snprintf(hpBuf, sizeof(hpBuf), "%.0f / %.0f%s", selfF->GetHP(), selfF->GetMaxHP(),
+		              selfF->IsCollapsing() ? " 崩壊!" : "");
+		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.30f, 0.55f, 1.0f, 1.0f));
+		ImGui::ProgressBar(selfF->GetHPRatio(), ImVec2(-1.0f, 0.0f), hpBuf);
+		ImGui::PopStyleColor();
+		// 敵陣(赤系バー)。
+		ImGui::Text("敵陣の床HP"); ImGui::SameLine();
+		std::snprintf(hpBuf, sizeof(hpBuf), "%.0f / %.0f%s", enemyF->GetHP(), enemyF->GetMaxHP(),
+		              enemyF->IsCollapsing() ? " 崩壊!" : "");
+		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.95f, 0.30f, 0.28f, 1.0f));
+		ImGui::ProgressBar(enemyF->GetHPRatio(), ImVec2(-1.0f, 0.0f), hpBuf);
+		ImGui::PopStyleColor();
 		ImGui::Text("敵コンベア : 搬送中 %d / 大砲[胴%s 頭%s] / 敵弾 %d 発",
 		            enemyConveyor_->PartCount(),
 		            enemyConveyor_->HasBody() ? "○" : "×",
 		            enemyConveyor_->HasHead() ? "○" : "×",
 		            enemyConveyor_->BulletCount());
+
+		// 弾の打ち消し(相殺)の切り替え。OFFなら互いの床にダメージを与え合える。
+		ImGui::Checkbox("弾の打ち消し(相殺)を有効化", &bulletCancelEnabled_);
+		ImGui::SameLine();
+		ImGui::TextDisabled(bulletCancelEnabled_ ? "(空中で相殺・ダメージ入らず)" : "(相殺なし・ダメージあり)");
 		ImGui::Separator();
 
 		// アイテム/クラフトの状態表示。
