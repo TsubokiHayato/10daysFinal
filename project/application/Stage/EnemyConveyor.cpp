@@ -2,6 +2,7 @@
 #include "StageLayout.h"
 #include "Stage/Field.h"
 #include "Camera.h"
+#include "audio/AudioManager.h" // 効果音
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -256,6 +257,7 @@ void EnemyConveyor::Update() {
 			float dmg = s.damage * params_.floorDamageMul;
 			float radius = params_.hitBaseRadius + s.blast * params_.hitBlastRadius;
 			playerField_->ApplyDamage(b->GetTarget(), dmg, radius);
+			AudioManager::GetInstance()->PlaySe("Explosion01-1(Short).mp3"); // 着弾爆発音
 		}
 	}
 	bullets_.erase(std::remove_if(bullets_.begin(), bullets_.end(),

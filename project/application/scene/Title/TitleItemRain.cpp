@@ -33,7 +33,6 @@ const TitleDropDef kTitleDrops[] = {
 	{"cone/cone.obj",                          {1.0f, 1.0f, 1.0f, 1.0f}, {0.8f, 0.8f, 0.8f}},
 	{"drill/drill.obj",                        {1.0f, 1.0f, 1.0f, 1.0f}, {0.8f, 0.8f, 0.8f}},
 	{"star.obj",                               {1.0f, 1.0f, 0.3f, 1.0f}, {0.8f, 0.8f, 0.8f}},
-	{"crown/crown.obj",                        {1.0f, 0.85f, 0.2f, 1.0f}, {0.9f, 0.9f, 0.9f}},
 	{"playerBullet/playerBullet.obj",          {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}},
 	{"player/Player.obj",                      {1.0f, 1.0f, 1.0f, 1.0f}, {0.5f, 0.5f, 0.5f}}, // 大きいので縮小
 	{"artilleryBattery/artillery battery.obj", {1.0f, 1.0f, 1.0f, 1.0f}, {0.4f, 0.4f, 0.4f}}, // 巨大なので更に縮小

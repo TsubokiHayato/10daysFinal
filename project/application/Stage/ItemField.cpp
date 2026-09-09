@@ -4,6 +4,7 @@
 #include "Stage/Field.h"
 #include "Camera.h"
 #include "Input.h"
+#include "audio/AudioManager.h" // 効果音
 #include <algorithm> // remove_if
 #include <cstdlib>   // rand
 
@@ -112,7 +113,10 @@ void ItemField::HandleInteraction(Player* player) {
 			bool deposited = false;
 			if (Dist2XZ(pp, workbench_->GetPosition()) < kBenchRange * kBenchRange) {
 				deposited = workbench_->TryDeposit(player->GetCarried());
-				if (deposited) player->SetCarried(nullptr);
+				if (deposited) {
+					player->SetCarried(nullptr);
+					AudioManager::GetInstance()->PlaySe("charge.mp3"); // 工作台に設置＝大砲装填と同じ音
+				}
 				tutorialFlagCarried_ = true;
 			}
 			if (!deposited) {
@@ -134,6 +138,7 @@ void ItemField::HandleInteraction(Player* player) {
 			if (best) {
 				best->SetState(Item::State::Held);
 				player->SetCarried(best);
+				AudioManager::GetInstance()->PlaySe("Motion-Grab01-1(Dry).mp3"); // 掴む音
 			}
 		}
 	}
@@ -164,6 +169,7 @@ void ItemField::Update() {
 		ShellStats stats = workbench_->Combine(); // 入力2つを消費
 		SpawnShell(stats, workbench_->GetOutputPosition());
 		tutorialFlagCreate_ = true;
+		AudioManager::GetInstance()->PlaySe("Fusion.mp3"); // 合成音
 	}
 
 	// アイテムの自動湧き：一定間隔で、最大数に達していなければ1個追加する。

@@ -6,6 +6,7 @@
 #include "Object3d.h"
 #include "Camera.h"
 #include "Input.h"
+#include "audio/AudioManager.h" // 効果音
 
 using namespace TuboEngine;
 
@@ -74,6 +75,8 @@ bool BulletManager::TryLoad(Player* player) {
 
 	isShot_ = true;
 
+	AudioManager::GetInstance()->PlaySe("charge.mp3"); // 装填音
+
 	return true;
 }
 
@@ -90,6 +93,7 @@ void BulletManager::Update() {
 			pending_ = nullptr;
 			isShot_ = false;
 			justFired_ = true; // 実際に発射できたフレームだけ合図する
+			AudioManager::GetInstance()->PlaySe("shot.mp3"); // 発射音
 		}
 		cannon_->SetIsBulletFired(false); // 次弾に備えてフラグを戻す
 
@@ -104,6 +108,7 @@ void BulletManager::Update() {
 			float dmg = s.damage * kPlayerFloorDmgMul;
 			float radius = kFloorHitBaseRadius + s.blast * kFloorHitBlastRadius;
 			enemyField_->ApplyDamage(b->GetTarget(), dmg, radius);
+			AudioManager::GetInstance()->PlaySe("Explosion01-1(Short).mp3"); // 着弾爆発音
 		}
 	}
 

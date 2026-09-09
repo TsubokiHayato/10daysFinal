@@ -8,6 +8,7 @@
 #include "OffScreenRendering.h" // 敗北演出のビネット
 #include "ParticleManager.h"    // 打ち消し演出のパーティクル
 #include "IParticleEmitter.h"   // ParticlePreset
+#include "audio/AudioManager.h" // 効果音
 #include "Stage/StageLayout.h"
 #include "Stage/Bullet.h"
 #include <cstdio>
@@ -423,7 +424,10 @@ void StageScene::ResolveBulletClashes() {
 	}
 
 	// 相殺が起きたら軽く画面を揺らして手応えを出す。
-	if (anyCancel) visualManager_->Shake(0.25f, 1.2f);
+	if (anyCancel) {
+		visualManager_->Shake(0.25f, 1.2f);
+		AudioManager::GetInstance()->PlaySe("Explosion01-1(Short).mp3"); // 空中相殺の爆発音
+	}
 }
 
 // =============================================================================

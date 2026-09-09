@@ -4,10 +4,15 @@
 #include "SceneRegistration.h"
 #include "GameScenes.h"
 #include "settings/Settings.h"
+#include "WinApp.h"  // タイトルバー文字列の設定
+#include <Windows.h> // SetWindowTextW
 
 void TuboEngine::Order::Initialize() {
 	// エンジン基盤の初期化（シーンには触れない）
 	TuboEngine::Framework::Initialize();
+
+	// タイトルバーの文字列を設定する（ウィンドウ生成後に上書き）。
+	SetWindowTextW(TuboEngine::WinApp::GetInstance()->GetHWND(), L"4026_融合！迫撃砲");
 
 	// 保存済みの設定を読み込む（未保存なら既定値のまま）
 	Settings::GetInstance()->Load();
