@@ -37,10 +37,10 @@ void StageEnvironment::Initialize(TuboEngine::Camera* camera) {
 	//    弾はこの中央大砲を狙って飛び、相手フィールド中央の床を削る。
 	selfCannonPos_ = selfField_->GetCenter();   // {-kFieldOffsetX, 0, 0}
 	enemyCannonPos_ = enemyField_->GetCenter();  // {+kFieldOffsetX, 0, 0}
-	AddProp("artilleryBattery/artillery battery.obj", selfCannonPos_, {0.0f, -kHalfPi, 0.0f},
-	        {2.6f, 2.6f, 2.6f}, {1.0f, 1.0f, 1.0f, 1.0f});
-	AddProp("artilleryBattery/artillery battery.obj", enemyCannonPos_, {0.0f, kHalfPi, 0.0f},
-	        {2.6f, 2.6f, 2.6f}, {1.0f, 1.0f, 1.0f, 1.0f});
+	selfCannonProp_ = AddProp("artilleryBattery/artillery battery.obj", selfCannonPos_,
+	                          {0.0f, -kHalfPi, 0.0f}, {2.6f, 2.6f, 2.6f}, {1.0f, 1.0f, 1.0f, 1.0f});
+	enemyCannonProp_ = AddProp("artilleryBattery/artillery battery.obj", enemyCannonPos_,
+	                           {0.0f, kHalfPi, 0.0f}, {2.6f, 2.6f, 2.6f}, {1.0f, 1.0f, 1.0f, 1.0f});
 
 	// 砲口（弾の発射始点）は大砲プロップの少し上。BulletManager に渡す。
 	muzzle_ = selfCannonPos_ + Math::Vector3{0.0f, 1.5f, 0.0f};
@@ -49,7 +49,22 @@ void StageEnvironment::Initialize(TuboEngine::Camera* camera) {
 void StageEnvironment::Update() {
 	selfField_->Update();
 	enemyField_->Update();
-	for (auto& p : props_) p->Update();
+
+	// 大砲：自陣/敵陣の床が崩壊し始めたら、その陣の大砲も一緒に落とす。
+	if (selfField_->IsCollapsing()) {
+		if (!selfCannonFall_.Started()) selfCannonFall_.Add(selfCannonProp_);
+		selfCannonFall_.Start();
+		selfCannonFall_.Update();
+	} else {
+		selfCannonProp_->Update();
+	}
+	if (enemyField_->IsCollapsing()) {
+		if (!enemyCannonFall_.Started()) enemyCannonFall_.Add(enemyCannonProp_);
+		enemyCannonFall_.Start();
+		enemyCannonFall_.Update();
+	} else {
+		enemyCannonProp_->Update();
+	}
 
 	// 任意：ワールドグリッド（デバッグ表示）。
 	if (showGrid_) {

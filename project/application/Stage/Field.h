@@ -1,6 +1,7 @@
 #pragma once
 #include "Object3d.h"
 #include "Vector3.h"
+#include "Stage/Collapser.h"
 #include <memory>
 #include <vector>
 
@@ -71,6 +72,7 @@ private:
 	bool collapsing_ = false; // 崩壊アニメ中
 	bool collapsed_ = false;  // 崩壊完了
 	float collapseTimer_ = 0.0f;
+	Collapser wallFall_; // 崩壊時に外周壁も一緒に落とす
 
 	// フィールドの広さ設定
 	int cols_ = 8;          // X方向のタイル数

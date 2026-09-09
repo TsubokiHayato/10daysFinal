@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "floorDamageMul": 4.0,
+  "hitBaseRadius": 4.5,
+  "hitBlastRadius": 1.399999976158142,
+  "spawnInterval": 600.0,
+  "travelFrames": 170.0
+}

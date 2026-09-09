@@ -36,14 +36,22 @@ constexpr float kCannonRange = 5.0f;     // 砲台に弾を装填できる距離
 constexpr float kCannonZoomRange = 9.0f; // この距離まで砲台に近づくと自動ズームアウト
 constexpr float kItemGroundY = 0.6f;     // 落ちているアイテムの基準高さ
 
+// プレイヤーのアイテム自動湧き。
+constexpr int   kMaxGroundItems = 20;       // フィールド上に同時に存在できるアイテムの最大数
+constexpr float kItemSpawnInterval = 75.0f; // 何フレームごとに1個湧かせるか
+constexpr float kCannonKeepOut = 5.0f;      // 砲台まわり(この半径内)には湧かせない
+constexpr float kBenchKeepOut = 4.0f;       // 作業台まわり(この半径内)には湧かせない
+
 // 床(フィールド)をHP化するための設定。
-constexpr float kTileMaxHP = 20.0f;           // 床タイル1枚あたりのHP
+constexpr float kFieldHP = 500.0f;            // フィールド(床)全体の総HP
+constexpr float kTileMaxHP = 20.0f;           // 床タイル1枚の“見た目の赤み”基準(表示用)
 constexpr float kFloorHitBaseRadius = 4.5f;   // 着弾ダメージが及ぶ基本半径
 constexpr float kFloorHitBlastRadius = 1.4f;  // 弾のblast1あたりの追加半径
 constexpr float kPlayerFloorDmgMul = 4.0f;    // プレイヤー弾→床ダメージ倍率
 
 // 弾同士の空中相殺：この距離まで近づいたら、強さに関係なく双方を打ち消す。
-constexpr float kBulletCancelRadius = 3.0f;
+// 球の見た目に対して当たりやすいよう、やや広めにとる。
+constexpr float kBulletCancelRadius = 5.0f;
 
 } // namespace game::layout
 

@@ -3,6 +3,7 @@
 #include "Stage/Item.h"
 #include "Stage/Workbench.h"
 #include "Stage/PartCatalog.h"
+#include "Stage/Collapser.h"
 #include <memory>
 #include <vector>
 
@@ -41,11 +42,22 @@ private:
 	Item* SpawnShell(const ShellStats& stats, const TuboEngine::Math::Vector3& pos);
 	void ScatterParts();
 
+	// 図鑑からランダムに1個パーツを湧かせる（最大数未満のときだけ）。
+	void TrySpawnRandomItem();
+	// 自陣内のランダムな地面座標を返す。砲台・作業台の周辺は避ける。
+	//  規定回数試して空き場所が見つからなければ false。
+	bool FindRandomGroundPos(TuboEngine::Math::Vector3& out) const;
+	// pos が砲台・作業台の占有圏に入っていないか（湧かせてよい場所か）。
+	bool IsSpawnAreaClear(const TuboEngine::Math::Vector3& pos) const;
+
 	TuboEngine::Camera* camera_ = nullptr;
 	Field* selfField_ = nullptr; // 借用
 
 	std::vector<std::unique_ptr<Item>> items_;
 	std::unique_ptr<Workbench> workbench_;
+
+	float spawnTimer_ = 0.0f; // 自動湧きのカウンタ
+	Collapser itemFall_;      // 自陣の床崩壊時に作業台・アイテムも落とす
 };
 
 } // namespace game

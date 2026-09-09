@@ -65,8 +65,8 @@ void Field::Initialize(TuboEngine::Camera* camera, const Math::Vector3& center,
 			tileSpin_.push_back({0.0f, 0.0f, 0.0f});
 		}
 	}
-	// フィールド総HP = 全タイルHPの合計。
-	maxHp_ = tileMaxHp_ * static_cast<float>(floor_.size());
+	// フィールド総HP = 固定のプール（タイル枚数に依存しない）。
+	maxHp_ = layout::kFieldHP;
 	hp_ = maxHp_;
 	collapsing_ = false;
 	collapsed_ = false;
@@ -111,24 +111,25 @@ void Field::SetCamera(TuboEngine::Camera* camera) {
 }
 
 void Field::ApplyDamage(const Math::Vector3& worldPos, float damage, float radius) {
-	if (collapsing_ || radius <= 0.0f) return;
+	if (collapsing_ || damage <= 0.0f) return;
 
-	for (size_t i = 0; i < floor_.size(); ++i) {
-		if (tileHp_[i] <= 0.0f) continue;
-		// XZ距離で減衰（中心ほど大ダメージ）。
-		float dx = tileHome_[i].x - worldPos.x;
-		float dz = tileHome_[i].z - worldPos.z;
-		float dist = std::sqrt(dx * dx + dz * dz);
-		if (dist >= radius) continue;
-
-		float falloff = 1.0f - dist / radius;
-		float dmg = damage * falloff;
-		float before = tileHp_[i];
-		tileHp_[i] = before - dmg;
-		if (tileHp_[i] < 0.0f) tileHp_[i] = 0.0f;
-		hp_ -= (before - tileHp_[i]);
-	}
+	// フィールド全体のHPプールを削る。着地点が固定でも毎回必ず減るように、
+	// タイルの残量には依存させない（タイルは見た目のフィードバック用）。
+	hp_ -= damage;
 	if (hp_ < 0.0f) hp_ = 0.0f;
+
+	// 見た目：着地点周辺のタイルを局所的に赤くする（着弾の手応え）。
+	if (radius > 0.0f) {
+		for (size_t i = 0; i < floor_.size(); ++i) {
+			float dx = tileHome_[i].x - worldPos.x;
+			float dz = tileHome_[i].z - worldPos.z;
+			float dist = std::sqrt(dx * dx + dz * dz);
+			if (dist >= radius) continue;
+			float falloff = 1.0f - dist / radius;
+			tileHp_[i] -= damage * falloff; // 局所的な赤み(表示用)
+			if (tileHp_[i] < 0.0f) tileHp_[i] = 0.0f;
+		}
+	}
 
 	// 総HPが尽きたら崩壊開始：各タイルに落下速度と回転を割り当てる。
 	if (hp_ <= 0.0f && !collapsing_) {
@@ -139,6 +140,9 @@ void Field::ApplyDamage(const Math::Vector3& worldPos, float damage, float radiu
 			               Rand11() * 0.06f};
 			tileSpin_[i] = {Rand11() * 0.08f, Rand11() * 0.05f, Rand11() * 0.08f};
 		}
+		// 外周壁も一緒に崩す。
+		for (auto& w : walls_) wallFall_.Add(w.get());
+		wallFall_.Start();
 	}
 }
 
@@ -155,14 +159,19 @@ void Field::Update() {
 			floor_[i]->SetModelColor(layout::kFloorDamaged);
 			floor_[i]->Update();
 		}
-		for (auto& w : walls_) w->Update();
+		wallFall_.Update(); // 外周壁も落下
 		if (collapseTimer_ >= 150.0f) collapsed_ = true;
 		return;
 	}
 
-	// 通常時：残HP比率で色を 元色(青)→赤 へ補間する。
+	// 通常時：色を 元色(青)→赤 へ補間する。
+	//  ・フィールド全体の残HP比率で全タイルを均一に赤へ寄せる（HPの減りが分かる）。
+	//  ・さらに着弾したタイルは局所的に濃く赤める（着弾点の手応え）。
+	const float globalDmg = 1.0f - GetHPRatio(); // 0=健康, 1=全損
 	for (size_t i = 0; i < floor_.size(); ++i) {
-		float ratio = tileMaxHp_ > 0.0f ? tileHp_[i] / tileMaxHp_ : 0.0f; // 1=健康,0=瀕死
+		float localDmg = tileMaxHp_ > 0.0f ? (1.0f - tileHp_[i] / tileMaxHp_) : 0.0f;
+		float d = globalDmg > localDmg ? globalDmg : localDmg; // より傷んでいる方
+		float ratio = 1.0f - d; // 1=健康(元色), 0=赤
 		const Math::Vector4& base = tileBase_[i];
 		const Math::Vector4& dmg = layout::kFloorDamaged;
 		Math::Vector4 c = {Lerpf(dmg.x, base.x, ratio), Lerpf(dmg.y, base.y, ratio),

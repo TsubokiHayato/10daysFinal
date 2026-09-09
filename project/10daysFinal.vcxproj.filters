@@ -168,6 +168,9 @@
     <ClInclude Include="application\Stage\Bullet.h">
       <Filter>application\scene\member</Filter>
     </ClInclude>
+    <ClInclude Include="application\Stage\Collapser.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
     <ClInclude Include="application\Stage\Castle.h">
       <Filter>application\scene\member</Filter>
     </ClInclude>
