@@ -59,6 +59,11 @@ private:
 	std::vector<std::unique_ptr<Item>> items_;
 	std::unique_ptr<Workbench> workbench_;
 
+	std::unique_ptr<TuboEngine::Object3d> keyIconE_;
+	bool isCarrying_ = false;
+	float iconETimer_ = 0.0f;
+	float iconEMaxTime_ = 0.3f;
+
 	bool tutorialFlagCarried_ = false;
 
 	bool tutorialFlagCreate_ = false;
