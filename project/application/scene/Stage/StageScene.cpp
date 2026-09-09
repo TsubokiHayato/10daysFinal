@@ -10,6 +10,7 @@
 #include "Stage/Bullet.h"
 #include <cstdio>
 #include <vector>
+#include <cmath>
 
 #ifdef USE_IMGUI
 #include "externals/imgui/imgui.h"
@@ -79,6 +80,10 @@ void StageScene::Initialize() {
 	// オプションクラスの初期化
 	option_ = std::make_unique<game::Option>();
 	option_->Initialize();
+
+	// 入場フェードイン（黒→ステージ）。クリア時はここから退場フェードアウトさせる。
+	fadeScreen_ = std::make_unique<FadeScreen>();
+	fadeScreen_->Initialize();
 }
 
 // 画面上のHP UI(スプライト)の幅を、各フィールドの床HP残量に合わせて縮める。
@@ -109,8 +114,8 @@ void StageScene::Update() {
 
 	// --- ワールドの進行（ポーズ中は丸ごと止める）---
 	if (!paused) {
-		// 敗北演出中は操作を受け付けない（崩落とビネットだけを見せる）。
-		if (!losing_) {
+		// 敗北/勝利演出中は操作を受け付けない（崩落やカメラ演出だけを見せる）。
+		if (!losing_ && !won_) {
 			// (1) プレイヤー入力・移動
 			player_->Update();
 
@@ -121,6 +126,15 @@ void StageScene::Update() {
 
 			// (3) 砲弾の発射・飛翔・命中
 			bulletManager_->Update();
+
+			// チュートリアル中(4項目すべて達成するまで)は敵に攻撃させない（生成/発射を止める）。
+			//  ・4項目=拾う/合成/装填/発射。すべて達成してから敵が攻撃を始める。
+			//  ※ Update 自体は毎フレーム呼ぶ必要がある（呼ばないとベルト等の Object3d が
+			//    未初期化のまま Draw されて commandList が null になり落ちる）。
+			const bool tutorialDone =
+				itemField_->GetTutorialFlagCarried() && itemField_->GetTutorialFlagCreate() &&
+				bulletManager_->GetTutorialFlagLoad() && bulletManager_->GetTutorialFlagShot();
+			enemyConveyor_->SetAttackSuppressed(!tutorialDone);
 
 			// (3.5) 敵の攻撃（ベルトコンベア→大砲→自陣の床）
 			enemyConveyor_->Update();
@@ -142,7 +156,10 @@ void StageScene::Update() {
 			game::layout::kCannonZoomRange * game::layout::kCannonZoomRange;
 		const bool anyCollapsing = environment_->GetSelfField()->IsCollapsing() ||
 		                           environment_->GetEnemyField()->IsCollapsing();
-		camera_->Update(player_->GetPosition(), nearCannon || anyCollapsing);
+		// 勝利演出中はカメラを自前で動かす（軌道＋ズーム）ので通常追従は止める。
+		if (!won_) {
+			camera_->Update(player_->GetPosition(), nearCannon || anyCollapsing);
+		}
 
 		tutorial_->Update(
 			itemField_->GetTutorialFlagCarried(),
@@ -153,17 +170,28 @@ void StageScene::Update() {
 
 		visualManager_->Update();
 
-		// (7) 敗北判定・演出：自陣(プレイヤーの陣地)の床が崩壊し始めたら敗北。
-		if (!losing_ && environment_->GetSelfField()->IsCollapsing()) {
-			StartLoseSequence();
+		// (7) 勝敗判定・演出。
+		//  ・勝利：敵陣が「崩れきってから」(IsCollapsed)開始。
+		//  ・敗北：自陣の床が崩壊し始めたら(IsCollapsing)開始。
+		if (!won_ && !losing_) {
+			if (environment_->GetEnemyField()->IsCollapsed()) {
+				StartWinSequence();
+			} else if (environment_->GetSelfField()->IsCollapsing()) {
+				StartLoseSequence();
+			}
 		}
-		if (losing_) {
+		if (won_) {
+			UpdateWinSequence(dt);
+		} else if (losing_) {
 			UpdateLoseSequence(dt);
 		}
 	}
 
 	// --- 表示系は常に更新（ポーズメニューやUIが正しく描画されるように）---
 	TuboEngine::TextManager::GetInstance()->UpdateAll();
+
+	// フェード（入場フェードイン／クリア時の退場フェードアウト）を進める。
+	fadeScreen_->Update();
 
 	// (6) HP UI(スプライト)を床HPに合わせて更新（UpdateAllでジオメトリに反映される前に）
 	UpdateHpUI();
@@ -213,6 +241,109 @@ void StageScene::UpdateLoseSequence(float dt) {
 	// 演出が終わったらタイトルへ戻す。
 	if (loseTimer_ >= kLoseDuration) {
 		SceneManager::GetInstance()->ChangeScene(TITLE);
+	}
+}
+
+// =============================================================================
+//  勝利(クリア)演出
+//   ・敵陣が崩れきってから開始（呼び出し側で IsCollapsed 判定）。
+//   ・カメラが自陣を一周しながらプレイヤーへズーム→停止→CLEAR表示→数秒後タイトルへ。
+// =============================================================================
+void StageScene::StartWinSequence() {
+	won_ = true;
+	winTimer_ = 0.0f;
+	clearTextShown_ = false;
+	// ズーム先＝開始時点のプレイヤー位置を控える（以後プレイヤーは動かないので固定でよい）。
+	winTarget_ = player_->GetPosition();
+}
+
+void StageScene::UpdateWinSequence(float dt) {
+	winTimer_ += dt;
+
+	// 各フェーズの長さ（秒）。
+	constexpr float kOrbitDuration = 4.0f; // 一周しながらズームインする時間
+	constexpr float kHoldDuration = 3.0f;  // 停止して CLEAR を見せる時間
+	// カメラ軌道パラメータ（球面座標: pos=target+radius*(cosP sinY, sinP, cosP cosY), rot={P,Y+π,0}）。
+	constexpr float kRadiusStart = 45.0f;  // 最初は引き（自陣全体が入る）
+	constexpr float kRadiusEnd = 9.0f;     // 最後はプレイヤーに寄る
+	constexpr float kPitchStart = 0.35f;   // 見下ろし角(開始)
+	constexpr float kPitchEnd = 0.55f;     // 見下ろし角(終了・やや見下ろす)
+	constexpr float kPi = 3.14159265f;
+	constexpr float kTwoPi = 6.28318530f;
+
+	TuboEngine::Camera* cam = camera_->GetCamera();
+	const Math::Vector3 look = winTarget_ + Math::Vector3{0.0f, 1.0f, 0.0f}; // プレイヤーの少し上を見る
+
+	// 必ず「プレイヤーの正面」でカメラが止まるよう終端角を決める。
+	//  ・プレイヤーの visual forward は (-sin(yaw), 0, -cos(yaw))。
+	//    球面座標のオフセット水平成分 (sinY, cosY) をこの前方向へ向ける → Y = yaw + π。
+	//    そこにカメラを置き、プレイヤーを見る（rot={P,Y+π,0}）ので正面（顔）が見える。
+	constexpr float kTotalSweep = kTwoPi * 1.5f;                    // 一周半
+	const float endYaw = player_->GetYaw() + kPi;                  // 正面に立つ最終角
+	const float startYaw = endYaw - kTotalSweep;                    // ここから回し始める
+
+	if (winTimer_ < kOrbitDuration) {
+		// --- フェーズ1：一周半しながらズームイン。必ず正面で終わる ---
+		float t = winTimer_ / kOrbitDuration;
+		float ez = 1.0f - (1.0f - t) * (1.0f - t) * (1.0f - t); // ズームはイーズアウト（最後ゆっくり寄る）
+		float yaw = startYaw + kTotalSweep * t;                 // 終端で endYaw（＝正面）に到達
+		float radius = kRadiusStart + (kRadiusEnd - kRadiusStart) * ez;
+		float pitch = kPitchStart + (kPitchEnd - kPitchStart) * ez;
+
+		float cosP = std::cos(pitch), sinP = std::sin(pitch);
+		Math::Vector3 offset = {radius * cosP * std::sin(yaw), radius * sinP, radius * cosP * std::cos(yaw)};
+		cam->SetTranslate(look + offset);
+		cam->setRotation({pitch, yaw + kPi, 0.0f});
+		cam->setScale({1.0f, 1.0f, 1.0f});
+		cam->Update();
+		// カメラを動かした後にプレイヤーを再投影（その場に固定したまま画面内で正しく回る）。
+		player_->UpdateVisualOnly();
+	} else {
+		// --- フェーズ2：停止して CLEAR を表示し、数秒後タイトルへ ---
+		if (!clearTextShown_) {
+			ShowClearText();
+			clearTextShown_ = true;
+		}
+		// CLEAR テキストを弾むように登場させる（最初の 0.4 秒だけスケールアニメ）。
+		if (clearText_) {
+			float ht = (winTimer_ - kOrbitDuration) / 0.4f;
+			if (ht > 1.0f) ht = 1.0f;
+			// EaseOutBack（少し行き過ぎて戻る）でポップ感を出す。
+			const float c1 = 1.70158f, c3 = c1 + 1.0f;
+			float back = 1.0f + c3 * (ht - 1.0f) * (ht - 1.0f) * (ht - 1.0f) + c1 * (ht - 1.0f) * (ht - 1.0f);
+			clearText_->SetScale(1.5f * back);
+		}
+		cam->Update(); // 最終姿勢のまま固定
+		player_->UpdateVisualOnly(); // 固定カメラでもプレイヤーを再投影して描画を保つ
+		if (winTimer_ >= kOrbitDuration + kHoldDuration) {
+			// 退場フェードアウト（黒へ）を始め、真っ黒になったらタイトルへ。
+			if (!winFadeStarted_) {
+				fadeScreen_->FadeOut();
+				winFadeStarted_ = true;
+			}
+			if (fadeScreen_->IsFadeOuting()) {
+				SceneManager::GetInstance()->ChangeScene(TITLE);
+			}
+		}
+	}
+}
+
+// 画面中央に大きく "CLEAR!!" を出す。
+void StageScene::ShowClearText() {
+	TextManager* tm = TextManager::GetInstance();
+	tm->GetOrCreateFontSized(TextManager::PresetFontNames::Best10, 128.0f);
+	tm->CreateTextWithName(
+		"WinClear",
+		TextManager::PresetFontNames::Best10 + "_128",
+		"CLEAR!!",
+		{640.0f, 300.0f},              // 画面中央（1280x720 の中央付近）
+		{1.0f, 0.9f, 0.2f, 1.0f},      // 金色
+		1.0f);
+	clearText_ = tm->GetTextByName("WinClear");
+	if (clearText_) {
+		clearText_->SetHorizontalAlign(1); // 中央揃え
+		clearText_->SetVerticalAlign(1);
+		clearText_->SetScale(0.0f);        // 0 から弾んで出る
 	}
 }
 
@@ -269,6 +400,7 @@ void StageScene::SpriteDraw() {
 
 	TuboEngine::TextManager::GetInstance()->DrawAll();
 	option_->Draw();
+	fadeScreen_->Draw(); // 最前面（入場フェードイン／退場フェードアウト）
 }
 
 void StageScene::ParticleDraw() {}

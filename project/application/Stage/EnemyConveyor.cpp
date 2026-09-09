@@ -203,8 +203,9 @@ void EnemyConveyor::Update() {
 		return;
 	}
 
-	// 敵の攻撃が無効、または相手(自陣)の床が崩壊したら攻撃を止める。
-	const bool active = params_.enabled &&
+	// 敵の攻撃が無効、抑制中(チュートリアル等)、または相手(自陣)の床が崩壊したら攻撃を止める。
+	//  ※ ここで止めるのは「生成/発射」だけ。ベルト等の見た目Updateは下で常に行う。
+	const bool active = params_.enabled && !attackSuppressed_ &&
 	                    (playerField_ == nullptr || !playerField_->IsCollapsing());
 
 	// ── パーツの生成（ゲートから胴/頭が交互に出る） ──

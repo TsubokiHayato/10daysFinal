@@ -33,7 +33,7 @@ constexpr float kHalfPi = 1.57079633f;
 constexpr float kPickRange = 3.0f;       // 地面アイテムを拾える距離
 constexpr float kBenchRange = 4.5f;      // 工作台に載せられる距離
 constexpr float kCannonRange = 5.0f;     // 砲台に弾を装填できる距離
-constexpr float kCannonZoomRange = 9.0f; // この距離まで砲台に近づくと自動ズームアウト
+constexpr float kCannonZoomRange = 12.0f; // この距離まで砲台に近づくと自動ズームアウト（タイル約2枚分＝6*2）
 constexpr float kItemGroundY = 0.6f;     // 落ちているアイテムの基準高さ
 
 // プレイヤーのアイテム自動湧き。

@@ -74,6 +74,14 @@ void Player::Update() {
 	}
 }
 
+void Player::UpdateVisualOnly() {
+	// 入力・移動・クランプは一切行わず、現在の位置・向きでモデルを更新するだけ。
+	//  ・動くカメラ（クリア演出の軌道）に合わせて毎フレーム再投影される。
+	model_->SetPosition(position_);
+	model_->SetRotation({0.0f, yaw_, 0.0f});
+	model_->Update();
+}
+
 void Player::Draw() {
 	model_->Draw();
 }
