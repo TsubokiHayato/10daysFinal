@@ -56,7 +56,7 @@ void StageScene::Initialize() {
 	// カメラをプレイヤー位置へスナップ（開始時にワープして見えないように）
 	camera_->SnapTo(player_->GetPosition());
 
-	//TextManager::GetInstance()->LoadTextLayout("Resources/Text/StageUI.json");
+	TextManager::GetInstance()->LoadTextLayout("Resources/Text/StageUI.json");
 
 
 	// HP UI(スプライト)の満タン幅を控える（以後は床HPの割合でこの幅を縮める）。
