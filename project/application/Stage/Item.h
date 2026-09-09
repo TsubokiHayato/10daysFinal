@@ -68,6 +68,10 @@ private:
 	TuboEngine::Math::Vector3 position_{0.0f, 0.0f, 0.0f};
 	bool active_ = true;
 	float spin_ = 0.0f; // 地面にある間くるくる回す
+
+	// 出現ポップ演出（スポーン/合成時に 0 から弾んで基準サイズへ）。
+	TuboEngine::Math::Vector3 baseScale_{1.0f, 1.0f, 1.0f}; // 本来のスケール
+	float spawnT_ = 0.0f;                                   // 0→1 の出現進捗（1で通常）
 };
 
 } // namespace game

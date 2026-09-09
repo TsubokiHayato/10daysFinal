@@ -78,6 +78,7 @@ bool BulletManager::TryLoad(Player* player) {
 }
 
 void BulletManager::Update() {
+	justFired_ = false; // 毎フレーム先頭でリセット（このフレーム発射したかを表す）
 
 	// ── 砲台の更新：SPACEで撃つ/撃たないフラグを立てる ──
 	cannon_->Update();
@@ -88,6 +89,7 @@ void BulletManager::Update() {
 			pending_->Fire(); // 以後は弾が自分で的へ飛ぶ
 			pending_ = nullptr;
 			isShot_ = false;
+			justFired_ = true; // 実際に発射できたフレームだけ合図する
 		}
 		cannon_->SetIsBulletFired(false); // 次弾に備えてフラグを戻す
 

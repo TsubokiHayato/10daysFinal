@@ -46,6 +46,9 @@ public:
 	bool GetTutorialFlagLoad() { return tutorialFlagLoad_; }
 	bool GetTutorialFlagShot() { return tutorialFlagShot_; }
 
+	// このフレームで発射したか（大砲ポップ演出などの合図に使う。Update ごとにリセット）。
+	bool JustFired() const { return justFired_; }
+
 	// 発射済み・飛翔中の弾を集める（弾同士の空中相殺に使う。借用ポインタ）。
 	std::vector<Bullet*> GetFlyingBullets();
 
@@ -73,6 +76,7 @@ private:
 
 	bool tutorialFlagLoad_ = false;
 	bool tutorialFlagShot_ = false;
+	bool justFired_ = false; // このフレームで発射したか（大砲ポップ用）
 };
 
 } // namespace game
