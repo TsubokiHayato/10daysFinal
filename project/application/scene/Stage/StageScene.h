@@ -9,6 +9,7 @@
 #include "Stage/StageCameraController.h"
 #include "Stage/VisualManager.h"
 #include "Stage/ItemDisplay.h"
+#include "stage/Option.h"
 #include <memory>
 
 // =============================================================================
@@ -63,4 +64,7 @@ private:
 	float enemyHpBaseW_ = 0.0f;
 	// アイテムの情報を表示するUIクラス。プレイヤーがアイテムを持つと現れる
 	std::unique_ptr <game::ItemDisplay> itemdisplay_;
+
+	// オプションクラス
+	std::unique_ptr<game::Option> option_;
 };

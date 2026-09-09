@@ -72,6 +72,9 @@ void StageScene::Initialize() {
 
 	visualManager_ = VisualManager::GetInstance();
 	visualManager_->Initialize(cam);
+	// オプションクラスの初期化
+	option_ = std::make_unique<game::Option>();
+	option_->Initialize();
 }
 
 // 画面上のHP UI(スプライト)の幅を、各フィールドの床HP残量に合わせて縮める。
@@ -125,7 +128,8 @@ void StageScene::Update() {
 
 
 	TuboEngine::TextManager::GetInstance()->UpdateAll();
-
+	// (5.5)　オプションの更新
+	option_->Update();
 
 	// (6) HP UI(スプライト)を床HPに合わせて更新（UpdateAllでジオメトリに反映される前に）
 	UpdateHpUI();
@@ -183,8 +187,8 @@ void StageScene::Object3DDraw() {
 
 void StageScene::SpriteDraw() {
 	itemdisplay_->Draw();
-
 	TuboEngine::TextManager::GetInstance()->DrawAll();
+	option_->Draw();
 }
 
 void StageScene::ParticleDraw() {}
