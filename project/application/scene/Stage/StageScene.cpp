@@ -56,7 +56,7 @@ void StageScene::Initialize() {
 	// カメラをプレイヤー位置へスナップ（開始時にワープして見えないように）
 	camera_->SnapTo(player_->GetPosition());
 
-	TextManager::GetInstance()->LoadTextLayout("Resources/Text/StageTutorial.json");
+	//TextManager::GetInstance()->LoadTextLayout("Resources/Text/StageUI.json");
 
 
 	// HP UI(スプライト)の満タン幅を控える（以後は床HPの割合でこの幅を縮める）。
@@ -69,6 +69,9 @@ void StageScene::Initialize() {
 	// アイテムのUI表示クラス
 	itemdisplay_ = std::make_unique<game::ItemDisplay>();
 	itemdisplay_->Initialize();
+
+	tutorial_ = std::make_unique<Tutorial>();
+	tutorial_->Initialize();
 
 	visualManager_ = VisualManager::GetInstance();
 	visualManager_->Initialize(cam);
@@ -136,6 +139,13 @@ void StageScene::Update() {
 	// (6) アイテム情報のUI表示
 	itemdisplay_->Update(player_->GetCarried());
 
+	tutorial_->Update(
+		itemField_->GetTutorialFlagCarried(),
+		itemField_->GetTutorialFlagCreate(),
+		bulletManager_->GetTutorialFlagLoad(),
+		bulletManager_->GetTutorialFlagShot()
+	);
+
 	visualManager_->Update();
 }
 
@@ -187,6 +197,9 @@ void StageScene::Object3DDraw() {
 
 void StageScene::SpriteDraw() {
 	itemdisplay_->Draw();
+
+	tutorial_->Draw();
+
 	TuboEngine::TextManager::GetInstance()->DrawAll();
 	option_->Draw();
 }
@@ -267,10 +280,10 @@ void StageScene::ImGuiDraw() {
 		ImGui::SameLine();
 		if (ImGui::Button("リロード")) sm->ChangeScene(STAGE);
 
-		TuboEngine::TextManager::GetInstance()->DrawImGui();
 	}
 	ImGuiManager::GetInstance()->EndPanel();
 
+	TuboEngine::TextManager::GetInstance()->DrawImGui();
 	player_->DrawImGui();
 	camera_->DrawImGui();
 	enemyConveyor_->DrawImGui();

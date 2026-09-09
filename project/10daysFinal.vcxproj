@@ -147,6 +147,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\Stage\EnemyConveyor.cpp" />
     <ClCompile Include="application\Stage\ItemField.cpp" />
     <ClCompile Include="application\Stage\StageCameraController.cpp" />
+    <ClCompile Include="application\Stage\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\Stage\Cannon.h" />
@@ -181,6 +182,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\Stage\EnemyConveyor.h" />
     <ClInclude Include="application\Stage\ItemField.h" />
     <ClInclude Include="application\Stage\StageCameraController.h" />
+    <ClInclude Include="application\Stage\Tutorial.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="EngineCore\EngineLib\EngineLib.vcxproj">

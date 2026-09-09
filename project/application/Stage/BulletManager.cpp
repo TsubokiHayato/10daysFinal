@@ -51,6 +51,9 @@ bool BulletManager::TryLoad(Player* player) {
 	player->SetCarried(nullptr);
 	// 砲台を再装填状態に戻す（前弾のフラグが残っていても撃てるように）。
 	cannon_->SetIsBulletFired(false);
+
+	tutorialFlagLoad_ = true;
+
 	return true;
 }
 
@@ -65,6 +68,8 @@ void BulletManager::Update() {
 			pending_ = nullptr;
 		}
 		cannon_->SetIsBulletFired(false); // 次弾に備えてフラグを戻す
+
+		tutorialFlagShot_ = true;
 	}
 
 	// ── 飛翔と命中：弾を更新し、的に到達したら相手の床タイルを削る ──

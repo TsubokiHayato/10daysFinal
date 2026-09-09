@@ -108,6 +108,9 @@
     <ClCompile Include="application\Stage\ItemDisplay.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
+    <ClCompile Include="application\Stage\Tutorial.cpp" />
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
     <ClCompile Include="application\Stage\Option.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
@@ -200,6 +203,9 @@
       <Filter>application\scene\member</Filter>
     </ClInclude>
     <ClInclude Include="application\Stage\ItemDisplay.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\Tutorial.h" />
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
     <ClInclude Include="application\Stage\Option.h">
