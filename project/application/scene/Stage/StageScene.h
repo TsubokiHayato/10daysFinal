@@ -1,23 +1,26 @@
 #pragma once
 #include "IScene.h"
 
-#include "DebugCamera.h"
-#include "FollowCamera.h"
-#include "Player.h"
-#include "Field.h"
+#include "Stage/Player.h"
+#include "Stage/StageEnvironment.h"
+#include "Stage/ItemField.h"
+#include "Stage/BulletManager.h"
+#include "Stage/EnemyConveyor.h"
+#include "Stage/StageCameraController.h"
+#include "Stage/VisualManager.h"
+#include "Stage/ItemDisplay.h"
+#include "Stage/Collapser.h" // 敗北時にプレイヤーを落とす
 #include <memory>
 
 // =============================================================================
-//  StageScene ── ゲーム本編の見下ろしステージ。
+//  StageScene ── ゲーム本編の見下ろしステージ（進行の統括役）。
 //
-//  構成要素:
-//    ・Field        : 床＋外周壁のフィールド
-//    ・Player       : WASD で動くプレイヤー
-//    ・FollowCamera : プレイヤーを追う見下ろしカメラ（このシーンの主カメラ）
-//    ・DebugCamera  : F2 で切り替わる確認用フリーカメラ
-//
-//  砲弾の生成・発射・当たり判定などのゲームロジックは、この土台に
-//  Player / Field と同じ流儀で足していく想定。
+//  実処理は各システムに委譲し、このクラスは所有と更新順序の調整だけを持つ:
+//    ・StageCameraController : 追従/デバッグカメラ＋ズーム
+//    ・StageEnvironment      : フィールド・城・砲台プロップ・グリッド
+//    ・Player                : プレイヤー操作
+//    ・ItemField             : 地面アイテム・工作台・拾う/破棄/合成
+//    ・BulletManager         : 砲台・装填・発射・飛翔・命中
 // =============================================================================
 class StageScene : public IScene {
 public:
@@ -30,15 +33,45 @@ public:
 	void ParticleDraw() override;
 
 	TuboEngine::Camera* GetMainCamera() const override {
-		return followCamera_->GetCamera();
+		return camera_->GetCamera();
 	}
 
 private:
-	std::unique_ptr<game::FollowCamera> followCamera_;
-	std::unique_ptr<TuboEngine::DebugCamera> debugCamera_;
+	// 飛翔中のプレイヤー弾と敵弾が接触したら、強さに関係なく双方を打ち消す。
+	void ResolveBulletClashes();
 
-	std::unique_ptr<game::Field> field_;
+	// 画面上のHP UI(PlayerHP/EnemyHPスプライト)の幅を、床HPの残り割合に合わせて更新する。
+	void UpdateHpUI();
+
+	// 敗北演出：ビネットを徐々に濃くしながら崩落を見せ、タイトルへ戻す。
+	//  ・自陣(プレイヤーの陣地)の床が崩壊し始めたら開始する。
+	void StartLoseSequence();
+	void UpdateLoseSequence(float dt);
+
+	std::unique_ptr<game::StageCameraController> camera_;
+	std::unique_ptr<game::StageEnvironment> environment_;
 	std::unique_ptr<game::Player> player_;
+	std::unique_ptr<game::ItemField> itemField_;
+	std::unique_ptr<game::BulletManager> bulletManager_;
+	std::unique_ptr<game::EnemyConveyor> enemyConveyor_;
 
-	bool showGrid_ = false; // 追加のワールドグリッド表示（デバッグ）
+	VisualManager* visualManager_ = nullptr;
+
+	// 弾同士の空中相殺(打ち消し)を有効にするか。
+	//  ・true（既定）: 自弾と敵弾が空中で接触したら双方消滅（＝打ち消し）。
+	//                  すれ違わなかった弾はそのまま相手の床に着弾してダメージを与える。
+	//  ・false         : 相殺しない（デバッグ用。着弾ダメージだけを確認したいとき）。
+	//  デバッグビルドでは ImGui のチェックボックスから切り替えられる。
+	bool bulletCancelEnabled_ = true;
+
+	// HP UI(PlayerHP/EnemyHP スプライト)の満タン時の幅。Initialize で控える。
+	float playerHpBaseW_ = 0.0f;
+	float enemyHpBaseW_ = 0.0f;
+
+	// 敗北演出の状態。
+	bool losing_ = false;      // 敗北演出中（開始したら二度と戻さない）
+	float loseTimer_ = 0.0f;   // 敗北演出の経過(秒)。ビネット強度とタイトル遷移に使う。
+	game::Collapser playerFall_; // 敗北時にプレイヤーを床と一緒に落下させる。
+	// アイテムの情報を表示するUIクラス。プレイヤーがアイテムを持つと現れる
+	std::unique_ptr <game::ItemDisplay> itemdisplay_;
 };

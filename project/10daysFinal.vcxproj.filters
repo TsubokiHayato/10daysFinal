@@ -44,19 +44,31 @@
     <ClCompile Include="application\scene\Title\TitleScene.cpp">
       <Filter>application\scene\Title</Filter>
     </ClCompile>
+    <ClCompile Include="application\scene\Title\TitleItemRain.cpp">
+      <Filter>application\scene\Title</Filter>
+    </ClCompile>
     <ClCompile Include="application\scene\Option\OptionScene.cpp">
       <Filter>application\scene\Option</Filter>
     </ClCompile>
     <ClCompile Include="application\scene\Stage\StageScene.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
-    <ClCompile Include="application\scene\Stage\FollowCamera.cpp">
+    <ClCompile Include="application\Stage\FollowCamera.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
-    <ClCompile Include="application\scene\Stage\Player.cpp">
+    <ClCompile Include="application\Stage\Player.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
-    <ClCompile Include="application\scene\Stage\Field.cpp">
+    <ClCompile Include="application\Stage\Field.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\Item.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\Workbench.cpp">
+      <Filter>application\scene\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\PartCatalog.cpp">
       <Filter>application\scene\Stage</Filter>
     </ClCompile>
     <ClCompile Include="application\settings\Settings.cpp">
@@ -65,11 +77,39 @@
     <ClCompile Include="application\audio\AudioManager.cpp">
       <Filter>application\audio</Filter>
     </ClCompile>
-    <ClCompile Include="nagaiScene.cpp">
+    <ClCompile Include="application\scene\Member\nagaiScene.cpp">
       <Filter>application\scene\member</Filter>
     </ClCompile>
-    <ClCompile Include="OnoderaScene.cpp">
+    <ClCompile Include="application\scene\Member\OnoderaScene.cpp">
       <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\Cannon.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\Bullet.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\Castle.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\VisualManager.cpp" />
+    <ClCompile Include="application\Stage\StageEnvironment.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\BulletManager.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\EnemyConveyor.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\ItemField.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\StageCameraController.cpp">
+      <Filter>application\scene\member</Filter>
+    </ClCompile>
+    <ClCompile Include="application\Stage\ItemDisplay.cpp">
+      <Filter>application\scene\Stage</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -89,19 +129,31 @@
     <ClInclude Include="application\scene\Title\TitleScene.h">
       <Filter>application\scene\Title</Filter>
     </ClInclude>
+    <ClInclude Include="application\scene\Title\TitleItemRain.h">
+      <Filter>application\scene\Title</Filter>
+    </ClInclude>
     <ClInclude Include="application\scene\Option\OptionScene.h">
       <Filter>application\scene\Option</Filter>
     </ClInclude>
     <ClInclude Include="application\scene\Stage\StageScene.h">
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="application\scene\Stage\FollowCamera.h">
+    <ClInclude Include="application\Stage\FollowCamera.h">
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="application\scene\Stage\Player.h">
+    <ClInclude Include="application\Stage\Player.h">
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="application\scene\Stage\Field.h">
+    <ClInclude Include="application\Stage\Field.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\Item.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\Workbench.h">
+      <Filter>application\scene\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\PartCatalog.h">
       <Filter>application\scene\Stage</Filter>
     </ClInclude>
     <ClInclude Include="application\settings\Settings.h">
@@ -110,11 +162,48 @@
     <ClInclude Include="application\audio\AudioManager.h">
       <Filter>application\audio</Filter>
     </ClInclude>
-    <ClInclude Include="OnoderaScene.h">
+    <ClInclude Include="application\scene\Member\OnoderaScene.h">
       <Filter>application\scene\member</Filter>
     </ClInclude>
-    <ClInclude Include="nagaiScene.h">
+    <ClInclude Include="application\scene\Member\nagaiScene.h">
       <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\Cannon.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\Bullet.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\Collapser.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\Castle.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\StatusEffect.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\VisualManager.h" />
+    <ClInclude Include="application\Stage\StageLayout.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\StageEnvironment.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\BulletManager.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\EnemyConveyor.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\ItemField.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\StageCameraController.h">
+      <Filter>application\scene\member</Filter>
+    </ClInclude>
+    <ClInclude Include="application\Stage\ItemDisplay.h">
+      <Filter>application\scene\Stage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

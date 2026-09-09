@@ -65,7 +65,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)EngineCore\;$(ProjectDir)EngineCore\engine\base;$(ProjectDir)EngineCore\engine\graphic;$(ProjectDir)EngineCore\engine\graphic\2d;$(ProjectDir)EngineCore\engine\graphic\3d;$(ProjectDir)EngineCore\engine\input;$(ProjectDir)EngineCore\engine\leakChecker;$(ProjectDir)EngineCore\engine\math;$(ProjectDir)EngineCore\engine\imgui;$(ProjectDir)EngineCore\engine\camera;$(ProjectDir)EngineCore\engine\audio;$(ProjectDir)EngineCore\engine\graphic\Particle;$(ProjectDir)EngineCore\engine\scene;$(ProjectDir)EngineCore\engine\base\Framework;$(ProjectDir)EngineCore\engine\base\Utilities;$(ProjectDir)EngineCore\engine\base\Common;$(ProjectDir)EngineCore\engine\graphic\data;$(ProjectDir)EngineCore\engine\graphic\PSO;$(ProjectDir)EngineCore\externals\assimp\include;$(ProjectDir)EngineCore\engine\graphic\PSO\Blend;$(ProjectDir)EngineCore\engine\graphic\PSO\PostEffect;$(ProjectDir)EngineCore\engine\graphic\PostEffect;$(ProjectDir)EngineCore\engine\graphic\SkyBox;$(ProjectDir)application;$(ProjectDir)application\scene;$(ProjectDir)EngineCore\engine\graphic\line;$(ProjectDir)EngineCore\engine\graphic\Animation;$(ProjectDir)EngineCore\externals\nlohmann</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)EngineCore\;$(ProjectDir)EngineCore\engine\base;$(ProjectDir)EngineCore\engine\graphic;$(ProjectDir)EngineCore\engine\graphic\2d;$(ProjectDir)EngineCore\engine\graphic\3d;$(ProjectDir)EngineCore\engine\input;$(ProjectDir)EngineCore\engine\leakChecker;$(ProjectDir)EngineCore\engine\math;$(ProjectDir)EngineCore\engine\imgui;$(ProjectDir)EngineCore\engine\camera;$(ProjectDir)EngineCore\engine\audio;$(ProjectDir)EngineCore\engine\graphic\Particle;$(ProjectDir)EngineCore\engine\scene;$(ProjectDir)EngineCore\engine\base\Framework;$(ProjectDir)EngineCore\engine\base\Utilities;$(ProjectDir)EngineCore\engine\base\Common;$(ProjectDir)EngineCore\engine\graphic\data;$(ProjectDir)EngineCore\engine\graphic\PSO;$(ProjectDir)EngineCore\externals\assimp\include;$(ProjectDir)EngineCore\engine\graphic\PSO\Blend;$(ProjectDir)EngineCore\engine\graphic\PSO\PostEffect;$(ProjectDir)EngineCore\engine\graphic\PostEffect;$(ProjectDir)EngineCore\engine\graphic\SkyBox;$(ProjectDir)application;$(ProjectDir)application\scene;$(ProjectDir)application\scene\Stage;$(ProjectDir)EngineCore\engine\graphic\line;$(ProjectDir)EngineCore\engine\graphic\Animation;$(ProjectDir)EngineCore\externals\nlohmann</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -96,7 +96,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)EngineCore\;$(ProjectDir)EngineCore\engine\base;$(ProjectDir)EngineCore\engine\graphic;$(ProjectDir)EngineCore\engine\graphic\2d;$(ProjectDir)EngineCore\engine\graphic\3d;$(ProjectDir)EngineCore\engine\input;$(ProjectDir)EngineCore\engine\leakChecker;$(ProjectDir)EngineCore\engine\math;$(ProjectDir)EngineCore\engine\imgui;$(ProjectDir)EngineCore\engine\camera;$(ProjectDir)EngineCore\engine\audio;$(ProjectDir)EngineCore\engine\graphic\Particle;$(ProjectDir)EngineCore\engine\scene;$(ProjectDir)EngineCore\engine\base\Framework;$(ProjectDir)EngineCore\engine\base\Utilities;$(ProjectDir)EngineCore\engine\base\Common;$(ProjectDir)EngineCore\engine\graphic\data;$(ProjectDir)EngineCore\engine\graphic\PSO;$(ProjectDir)EngineCore\externals\assimp\include;$(ProjectDir)EngineCore\engine\graphic\PSO\Blend;$(ProjectDir)EngineCore\engine\graphic\PSO\PostEffect;$(ProjectDir)EngineCore\engine\graphic\PostEffect;$(ProjectDir)EngineCore\engine\graphic\SkyBox;$(ProjectDir)application;$(ProjectDir)application\scene;$(ProjectDir)EngineCore\engine\graphic\line;$(ProjectDir)EngineCore\engine\graphic\Animation;$(ProjectDir)EngineCore\externals\nlohmann</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)EngineCore\;$(ProjectDir)EngineCore\engine\base;$(ProjectDir)EngineCore\engine\graphic;$(ProjectDir)EngineCore\engine\graphic\2d;$(ProjectDir)EngineCore\engine\graphic\3d;$(ProjectDir)EngineCore\engine\input;$(ProjectDir)EngineCore\engine\leakChecker;$(ProjectDir)EngineCore\engine\math;$(ProjectDir)EngineCore\engine\imgui;$(ProjectDir)EngineCore\engine\camera;$(ProjectDir)EngineCore\engine\audio;$(ProjectDir)EngineCore\engine\graphic\Particle;$(ProjectDir)EngineCore\engine\scene;$(ProjectDir)EngineCore\engine\base\Framework;$(ProjectDir)EngineCore\engine\base\Utilities;$(ProjectDir)EngineCore\engine\base\Common;$(ProjectDir)EngineCore\engine\graphic\data;$(ProjectDir)EngineCore\engine\graphic\PSO;$(ProjectDir)EngineCore\externals\assimp\include;$(ProjectDir)EngineCore\engine\graphic\PSO\Blend;$(ProjectDir)EngineCore\engine\graphic\PSO\PostEffect;$(ProjectDir)EngineCore\engine\graphic\PostEffect;$(ProjectDir)EngineCore\engine\graphic\SkyBox;$(ProjectDir)application;$(ProjectDir)application\scene;$(ProjectDir)application\scene\Stage;$(ProjectDir)EngineCore\engine\graphic\line;$(ProjectDir)EngineCore\engine\graphic\Animation;$(ProjectDir)EngineCore\externals\nlohmann</AdditionalIncludeDirectories>
       <Optimization>MinSpace</Optimization>
     </ClCompile>
     <Link>
@@ -118,38 +118,69 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="application\Stage\Cannon.cpp" />
+    <ClCompile Include="application\Stage\Bullet.cpp" />
+    <ClCompile Include="application\Stage\Castle.cpp" />
+    <ClCompile Include="application\Stage\ItemDisplay.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="FadeScreen.cpp" />
     <ClCompile Include="application\Order.cpp" />
     <ClCompile Include="application\scene\SceneRegistration.cpp" />
     <ClCompile Include="application\scene\Sample\SampleScene.cpp" />
     <ClCompile Include="application\scene\Title\TitleScene.cpp" />
+    <ClCompile Include="application\scene\Title\TitleItemRain.cpp" />
     <ClCompile Include="application\scene\Option\OptionScene.cpp" />
     <ClCompile Include="application\scene\Stage\StageScene.cpp" />
-    <ClCompile Include="application\scene\Stage\FollowCamera.cpp" />
-    <ClCompile Include="application\scene\Stage\Player.cpp" />
-    <ClCompile Include="application\scene\Stage\Field.cpp" />
+    <ClCompile Include="application\Stage\FollowCamera.cpp" />
+    <ClCompile Include="application\Stage\Player.cpp" />
+    <ClCompile Include="application\Stage\Field.cpp" />
+    <ClCompile Include="application\Stage\Item.cpp" />
+    <ClCompile Include="application\Stage\Workbench.cpp" />
+    <ClCompile Include="application\Stage\PartCatalog.cpp" />
     <ClCompile Include="application\settings\Settings.cpp" />
     <ClCompile Include="application\audio\AudioManager.cpp" />
-    <ClCompile Include="nagaiScene.cpp" />
-    <ClCompile Include="OnoderaScene.cpp" />
+    <ClCompile Include="application\scene\Member\nagaiScene.cpp" />
+    <ClCompile Include="application\scene\Member\OnoderaScene.cpp" />
+    <ClCompile Include="application\Stage\VisualManager.cpp" />
+    <ClCompile Include="application\Stage\StageEnvironment.cpp" />
+    <ClCompile Include="application\Stage\BulletManager.cpp" />
+    <ClCompile Include="application\Stage\EnemyConveyor.cpp" />
+    <ClCompile Include="application\Stage\ItemField.cpp" />
+    <ClCompile Include="application\Stage\StageCameraController.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="application\Stage\Cannon.h" />
+    <ClInclude Include="application\Stage\Bullet.h" />
+    <ClInclude Include="application\Stage\Collapser.h" />
+    <ClInclude Include="application\Stage\Castle.h" />
+    <ClInclude Include="application\Stage\ItemDisplay.h" />
+    <ClInclude Include="application\Stage\StatusEffect.h" />
     <ClInclude Include="FadeScreen.h" />
     <ClInclude Include="application\Order.h" />
     <ClInclude Include="application\scene\GameScenes.h" />
     <ClInclude Include="application\scene\SceneRegistration.h" />
     <ClInclude Include="application\scene\Sample\SampleScene.h" />
     <ClInclude Include="application\scene\Title\TitleScene.h" />
+    <ClInclude Include="application\scene\Title\TitleItemRain.h" />
     <ClInclude Include="application\scene\Option\OptionScene.h" />
     <ClInclude Include="application\scene\Stage\StageScene.h" />
-    <ClInclude Include="application\scene\Stage\FollowCamera.h" />
-    <ClInclude Include="application\scene\Stage\Player.h" />
-    <ClInclude Include="application\scene\Stage\Field.h" />
+    <ClInclude Include="application\Stage\FollowCamera.h" />
+    <ClInclude Include="application\Stage\Player.h" />
+    <ClInclude Include="application\Stage\Field.h" />
+    <ClInclude Include="application\Stage\Item.h" />
+    <ClInclude Include="application\Stage\Workbench.h" />
+    <ClInclude Include="application\Stage\PartCatalog.h" />
     <ClInclude Include="application\settings\Settings.h" />
     <ClInclude Include="application\audio\AudioManager.h" />
-    <ClInclude Include="nagaiScene.h" />
-    <ClInclude Include="OnoderaScene.h" />
+    <ClInclude Include="application\scene\Member\nagaiScene.h" />
+    <ClInclude Include="application\scene\Member\OnoderaScene.h" />
+    <ClInclude Include="application\Stage\VisualManager.h" />
+    <ClInclude Include="application\Stage\StageLayout.h" />
+    <ClInclude Include="application\Stage\StageEnvironment.h" />
+    <ClInclude Include="application\Stage\BulletManager.h" />
+    <ClInclude Include="application\Stage\EnemyConveyor.h" />
+    <ClInclude Include="application\Stage\ItemField.h" />
+    <ClInclude Include="application\Stage\StageCameraController.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="EngineCore\EngineLib\EngineLib.vcxproj">

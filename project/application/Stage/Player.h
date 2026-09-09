@@ -1,9 +1,11 @@
-#pragma once
+				#pragma once
 #include "Object3d.h"
 #include "Vector3.h"
 #include <memory>
 
 namespace TuboEngine { class Camera; }
+
+namespace game { class Item; }
 
 // =============================================================================
 //  Player ── プレイヤー本体（見下ろし操作）。
@@ -26,10 +28,29 @@ public:
 	void SetPosition(const TuboEngine::Math::Vector3& p) { position_ = p; }
 	const TuboEngine::Math::Vector3& GetPosition() const { return position_; }
 
-	// 移動可能な半径（フィールド半分のサイズ）を渡してクランプに使う
-	void SetMoveBounds(float halfX, float halfZ) { boundHalfX_ = halfX; boundHalfZ_ = halfZ; }
+	// 移動可能な半径（フィールド半分のサイズ）を渡してクランプに使う。
+	// 原点中心で使う簡易版。
+	void SetMoveBounds(float halfX, float halfZ) {
+		boundCenter_ = {0.0f, 0.0f, 0.0f};
+		boundHalfX_ = halfX;
+		boundHalfZ_ = halfZ;
+	}
+	// フィールド中心が原点でない場合（自陣が左寄り等）はこちらで中心も渡す。
+	void SetMoveBounds(const TuboEngine::Math::Vector3& center, float halfX, float halfZ) {
+		boundCenter_ = center;
+		boundHalfX_ = halfX;
+		boundHalfZ_ = halfZ;
+	}
 
 	void SetCamera(TuboEngine::Camera* camera);
+
+	// 見た目の Object3d（敗北時の崩落演出などで外部から落下させるとき用）。
+	TuboEngine::Object3d* GetModel() const { return model_.get(); }
+
+	// 手持ちアイテム（拾う/捨てる/工作台へ載せる際に StageScene から操作する）。
+	void SetCarried(game::Item* item) { carried_ = item; }
+	game::Item* GetCarried() const { return carried_; }
+	bool IsCarrying() const { return carried_ != nullptr; }
 
 #ifdef USE_IMGUI
 	void DrawImGui();
@@ -42,7 +63,10 @@ private:
 	float moveSpeed_ = 0.25f; // 1フレームあたりの移動量
 	float yaw_ = 0.0f;        // 向き（Y軸回転）
 
+	game::Item* carried_ = nullptr; // 手持ちアイテム（借用。所有は StageScene）
+
 	// フィールド境界（中心からの半分の広さ）。0以下ならクランプ無効。
+	TuboEngine::Math::Vector3 boundCenter_{0.0f, 0.0f, 0.0f}; // クランプの中心
 	float boundHalfX_ = 0.0f;
 	float boundHalfZ_ = 0.0f;
 };
