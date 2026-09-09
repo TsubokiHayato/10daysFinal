@@ -163,6 +163,8 @@ void StageScene::Object3DDraw() {
 void StageScene::SpriteDraw() {
 	itemdisplay_->Draw();
 
+	tutorial_->Draw();
+
 	TuboEngine::TextManager::GetInstance()->DrawAll();
 }
 
