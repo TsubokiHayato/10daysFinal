@@ -165,12 +165,12 @@ void Field::Update() {
 	}
 
 	// 通常時：色を 元色(青)→赤 へ補間する。
-	//  ・フィールド全体の残HP比率で全タイルを均一に赤へ寄せる（HPの減りが分かる）。
-	//  ・さらに着弾したタイルは局所的に濃く赤める（着弾点の手応え）。
-	const float globalDmg = 1.0f - GetHPRatio(); // 0=健康, 1=全損
+	//  ・着弾したタイルだけを局所的に赤める（着弾点の手応え）。
+	//  ・フィールド総HPでの一律変色は行わない（陣地の床全体が一気に変色しないように）。
+	//    総HPは HP UI バーと崩壊判定に使う。
 	for (size_t i = 0; i < floor_.size(); ++i) {
 		float localDmg = tileMaxHp_ > 0.0f ? (1.0f - tileHp_[i] / tileMaxHp_) : 0.0f;
-		float d = globalDmg > localDmg ? globalDmg : localDmg; // より傷んでいる方
+		float d = localDmg; // 被弾したタイルのみ赤へ寄せる
 		float ratio = 1.0f - d; // 1=健康(元色), 0=赤
 		const Math::Vector4& base = tileBase_[i];
 		const Math::Vector4& dmg = layout::kFloorDamaged;
