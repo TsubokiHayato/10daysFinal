@@ -6,6 +6,8 @@
 #include "Input.h"
 #include "TextManager.h"
 #include "OffScreenRendering.h" // 敗北演出のビネット
+#include "ParticleManager.h"    // 打ち消し演出のパーティクル
+#include "IParticleEmitter.h"   // ParticlePreset
 #include "Stage/StageLayout.h"
 #include "Stage/Bullet.h"
 #include <cstdio>
@@ -84,6 +86,38 @@ void StageScene::Initialize() {
 	// 入場フェードイン（黒→ステージ）。クリア時はここから退場フェードアウトさせる。
 	fadeScreen_ = std::make_unique<FadeScreen>();
 	fadeScreen_->Initialize();
+
+	// 弾の打ち消し用パーティクル（手動バースト。autoEmit=false で必要時に Emit する）。
+	ParticlePreset clash;
+	clash.name = "ClashBurst";
+	clash.texture = "circle.png";
+	clash.maxInstances = 128;
+	clash.billboard = true;
+	clash.autoEmit = false;
+	clash.posMin = {-0.2f, -0.2f, -0.2f};
+	clash.posMax = {0.2f, 0.2f, 0.2f};
+	clash.velMin = {-3.5f, -1.0f, -3.5f};
+	clash.velMax = {3.5f, 4.0f, 3.5f};
+	clash.lifeMin = 0.25f;
+	clash.lifeMax = 0.5f;
+	clash.gravity = {0.0f, -8.0f, 0.0f};
+	clash.scaleStart = {0.35f, 0.35f, 0.35f};
+	clash.scaleEnd = {0.05f, 0.05f, 0.05f};
+	clash.colorStart = {1.0f, 1.0f, 0.7f, 1.0f}; // 明るい火花
+	clash.colorEnd = {1.0f, 0.6f, 0.2f, 0.0f};   // オレンジへ→消える
+	clash.simulateInWorldSpace = true;
+	if (IParticleEmitter* e = ParticleManager::GetInstance()->CreateEmitterByType("Default", clash)) {
+		clashFxName_ = e->GetName();
+	}
+}
+
+// 打ち消し地点で火花バーストを出す。
+void StageScene::EmitClashBurst(const Math::Vector3& pos) {
+	if (clashFxName_.empty()) return;
+	if (IParticleEmitter* e = ParticleManager::GetInstance()->Find(clashFxName_)) {
+		e->GetPreset().center = pos; // 発生原点を打ち消し地点へ移す
+		e->Emit(24);
+	}
 }
 
 // 画面上のHP UI(スプライト)の幅を、各フィールドの床HP残量に合わせて縮める。
@@ -126,6 +160,10 @@ void StageScene::Update() {
 
 			// (3) 砲弾の発射・飛翔・命中
 			bulletManager_->Update();
+			// 発射したフレームは大砲をポンッと拡縮させる（カートゥーン風）。
+			if (bulletManager_->JustFired()) {
+				environment_->PulseSelfCannon();
+			}
 
 			// チュートリアル中(4項目すべて達成するまで)は敵に攻撃させない（生成/発射を止める）。
 			//  ・4項目=拾う/合成/装填/発射。すべて達成してから敵が攻撃を始める。
@@ -192,6 +230,9 @@ void StageScene::Update() {
 
 	// フェード（入場フェードイン／クリア時の退場フェードアウト）を進める。
 	fadeScreen_->Update();
+
+	// パーティクル（打ち消し火花など）を進める。エンジンが自動更新しないのでシーンが駆動する。
+	ParticleManager::GetInstance()->Update(dt, camera_->GetCamera());
 
 	// (6) HP UI(スプライト)を床HPに合わせて更新（UpdateAllでジオメトリに反映される前に）
 	UpdateHpUI();
@@ -371,6 +412,9 @@ void StageScene::ResolveBulletClashes() {
 			float dx = pa.x - pb.x, dy = pa.y - pb.y, dz = pa.z - pb.z;
 			if (dx * dx + dy * dy + dz * dz > r2) continue;
 
+			// 打ち消し地点（2弾の中点）で火花バーストを出す。
+			EmitClashBurst({(pa.x + pb.x) * 0.5f, (pa.y + pb.y) * 0.5f, (pa.z + pb.z) * 0.5f});
+
 			a->Deactivate();
 			b->Deactivate();
 			anyCancel = true;
@@ -403,7 +447,9 @@ void StageScene::SpriteDraw() {
 	fadeScreen_->Draw(); // 最前面（入場フェードイン／退場フェードアウト）
 }
 
-void StageScene::ParticleDraw() {}
+void StageScene::ParticleDraw() {
+	ParticleManager::GetInstance()->Draw(); // 打ち消し火花など
+}
 
 // =============================================================================
 //  ImGui（Debug ビルドのみ）
@@ -495,6 +541,12 @@ void StageScene::ImGuiDraw() {
 void StageScene::Finalize() {
 	TuboEngine::TextManager::GetInstance()->ClearAllTexts();
 	TuboEngine::TextManager::GetInstance()->ClearAllSprites();
+
+	// 打ち消し用パーティクルを片付ける（次シーンへ残さない）。
+	if (!clashFxName_.empty()) {
+		ParticleManager::GetInstance()->Remove(clashFxName_);
+		clashFxName_.clear();
+	}
 
 	// 敗北時のビネットはあえて無効化しない。暗いままタイトルへ引き継ぎ、
 	// タイトル側で一気に明るくする（リビール）演出につなげる。

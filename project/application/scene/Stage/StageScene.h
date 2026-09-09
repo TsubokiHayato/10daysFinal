@@ -14,6 +14,7 @@
 #include "stage/Option.h"
 #include "FadeScreen.h" // 入場フェードイン／クリア時の退場フェードアウト
 #include <memory>
+#include <string>
 
 namespace TuboEngine { class TextObject; } // クリアテキストの参照保持用（前方宣言）
 
@@ -94,6 +95,11 @@ private:
 
 	// 入場フェードイン／クリア時の退場フェードアウト。
 	std::unique_ptr<FadeScreen> fadeScreen_;
+
+	// 弾の打ち消し演出用パーティクル（ParticleManager 所有。名前で参照）。
+	std::string clashFxName_;
+	// 指定ワールド座標で打ち消しバーストを出す。
+	void EmitClashBurst(const TuboEngine::Math::Vector3& pos);
 	// アイテムの情報を表示するUIクラス。プレイヤーがアイテムを持つと現れる
 	std::unique_ptr <game::ItemDisplay> itemdisplay_;
 	std::unique_ptr<Tutorial> tutorial_;

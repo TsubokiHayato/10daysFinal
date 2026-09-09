@@ -29,6 +29,9 @@ public:
 	void Update();
 	void Draw();
 
+	// 発射時に自陣大砲をカートゥーン風にポンッと拡縮させる（1発ごとに呼ぶ）。
+	void PulseSelfCannon();
+
 	// 他システムへ渡す情報。
 	Field* GetSelfField() const { return selfField_.get(); }
 	Field* GetEnemyField() const { return enemyField_.get(); }
@@ -63,6 +66,10 @@ private:
 	TuboEngine::Math::Vector3 enemyCannonPos_{0.0f, 0.0f, 0.0f}; // 敵陣大砲(中央)
 	TuboEngine::Math::Vector3 muzzle_{0.0f, 0.0f, 0.0f};         // 自陣大砲の砲口
 	bool showGrid_ = false;
+
+	// 自陣大砲の発射ポップ演出。cannonPulse_ が [0,1) の間だけ拡縮する（<0 で無効）。
+	static constexpr float kCannonBaseScale_ = 2.6f; // 通常時のスケール（AddProp と一致）
+	float cannonPulse_ = -1.0f;
 };
 
 } // namespace game

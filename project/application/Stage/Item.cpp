@@ -13,11 +13,14 @@ void Item::Build(TuboEngine::Camera* camera, const std::string& model, const Mat
 	state_ = State::Ground;
 	active_ = true;
 
+	baseScale_ = scale; // 本来のスケールを控え、出現ポップで 0→base へ弾ませる
+	spawnT_ = 0.0f;
+
 	model_ = std::make_unique<Object3d>();
 	model_->Initialize(model);
 	model_->SetCamera(camera);
 	model_->SetPosition(position_);
-	model_->SetScale(scale);
+	model_->SetScale({0.0f, 0.0f, 0.0f}); // 出現時は 0 から
 	model_->SetModelColor(color);
 }
 
@@ -60,6 +63,18 @@ void Item::Update() {
 		spin_ += 0.03f;
 		yaw = spin_;
 		drawPos.y += 0.2f + 0.15f * std::sin(spin_ * 2.0f);
+	}
+
+	// 出現ポップ：spawnT_ を 0→1 へ進め、EaseOutBack で少し行き過ぎて弾む。
+	if (spawnT_ < 1.0f) {
+		spawnT_ += 1.0f / 60.0f / 0.25f; // 約0.25秒で出現
+		if (spawnT_ > 1.0f) spawnT_ = 1.0f;
+		const float c1 = 1.70158f, c3 = c1 + 1.0f;
+		float u = spawnT_ - 1.0f;
+		float pop = 1.0f + c3 * u * u * u + c1 * u * u; // EaseOutBack (0→~1.1→1)
+		model_->SetScale({baseScale_.x * pop, baseScale_.y * pop, baseScale_.z * pop});
+	} else {
+		model_->SetScale(baseScale_);
 	}
 
 	model_->SetPosition(drawPos);

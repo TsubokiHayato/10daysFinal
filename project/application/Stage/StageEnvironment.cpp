@@ -2,6 +2,7 @@
 #include "StageLayout.h"
 #include "Camera.h"
 #include "LineManager.h"
+#include <cmath>
 
 using namespace TuboEngine;
 
@@ -56,6 +57,20 @@ void StageEnvironment::Update() {
 		selfCannonFall_.Start();
 		selfCannonFall_.Update();
 	} else {
+		// 発射ポップ：cannonPulse_ を 0→1 へ進め、sin で「ポンッ」と膨らんで戻す。
+		if (cannonPulse_ >= 0.0f) {
+			cannonPulse_ += 1.0f / 60.0f / 0.22f; // 約0.22秒で1回のポップ
+			if (cannonPulse_ >= 1.0f) {
+				cannonPulse_ = -1.0f; // 終了→通常スケールへ
+				selfCannonProp_->SetScale({kCannonBaseScale_, kCannonBaseScale_, kCannonBaseScale_});
+			} else {
+				// 縦に伸びて横が縮む squash&stretch 風。sin(π t) で 0→1→0。
+				float s = std::sin(3.14159265f * cannonPulse_);
+				float up = kCannonBaseScale_ * (1.0f + 0.35f * s);   // 縦は伸びる
+				float side = kCannonBaseScale_ * (1.0f - 0.15f * s); // 横は少し縮む
+				selfCannonProp_->SetScale({side, up, side});
+			}
+		}
 		selfCannonProp_->Update();
 	}
 	if (enemyField_->IsCollapsing()) {
@@ -72,6 +87,11 @@ void StageEnvironment::Update() {
 			(kFieldOffsetX + selfField_->GetHalfX()) * 2.0f, 24, {0.0f, 0.01f, 0.0f},
 			{0.4f, 0.4f, 0.4f, 1.0f});
 	}
+}
+
+// 発射時に呼ぶ：ポップ演出を最初から再生する。
+void StageEnvironment::PulseSelfCannon() {
+	cannonPulse_ = 0.0f;
 }
 
 void StageEnvironment::Draw() {
