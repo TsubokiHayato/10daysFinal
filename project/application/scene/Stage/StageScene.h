@@ -12,7 +12,10 @@
 #include "Stage/Collapser.h" // 敗北時にプレイヤーを落とす
 #include "Stage/Tutorial.h"
 #include "stage/Option.h"
+#include "FadeScreen.h" // 入場フェードイン／クリア時の退場フェードアウト
 #include <memory>
+
+namespace TuboEngine { class TextObject; } // クリアテキストの参照保持用（前方宣言）
 
 // =============================================================================
 //  StageScene ── ゲーム本編の見下ろしステージ（進行の統括役）。
@@ -50,6 +53,12 @@ private:
 	void StartLoseSequence();
 	void UpdateLoseSequence(float dt);
 
+	// 勝利(クリア)演出：敵陣が崩れきってから開始。
+	//  ・カメラが自陣を一周しながらプレイヤーへズーム→停止→CLEAR表示→数秒後タイトルへ。
+	void StartWinSequence();
+	void UpdateWinSequence(float dt);
+	void ShowClearText(); // 画面中央に CLEAR テキストを出す。
+
 	std::unique_ptr<game::StageCameraController> camera_;
 	std::unique_ptr<game::StageEnvironment> environment_;
 	std::unique_ptr<game::Player> player_;
@@ -74,6 +83,17 @@ private:
 	bool losing_ = false;      // 敗北演出中（開始したら二度と戻さない）
 	float loseTimer_ = 0.0f;   // 敗北演出の経過(秒)。ビネット強度とタイトル遷移に使う。
 	game::Collapser playerFall_; // 敗北時にプレイヤーを床と一緒に落下させる。
+
+	// 勝利(クリア)演出の状態。
+	bool won_ = false;        // クリア演出中（開始したら二度と戻さない）
+	float winTimer_ = 0.0f;   // クリア演出の経過(秒)。カメラ軌道・テキスト・遷移に使う。
+	TuboEngine::Math::Vector3 winTarget_{}; // カメラのズーム先（開始時のプレイヤー位置を控える）。
+	bool clearTextShown_ = false;           // CLEAR テキストを出したか。
+	TuboEngine::TextObject* clearText_ = nullptr; // CLEAR テキスト（登場アニメ用に保持）。
+	bool winFadeStarted_ = false;           // クリア演出後のフェードアウトを開始したか。
+
+	// 入場フェードイン／クリア時の退場フェードアウト。
+	std::unique_ptr<FadeScreen> fadeScreen_;
 	// アイテムの情報を表示するUIクラス。プレイヤーがアイテムを持つと現れる
 	std::unique_ptr <game::ItemDisplay> itemdisplay_;
 	std::unique_ptr<Tutorial> tutorial_;

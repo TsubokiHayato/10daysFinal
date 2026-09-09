@@ -28,6 +28,10 @@ public:
 	void SetPosition(const TuboEngine::Math::Vector3& p) { position_ = p; }
 	const TuboEngine::Math::Vector3& GetPosition() const { return position_; }
 
+	// 現在の向き（Y軸回転, ラジアン）。クリア演出でカメラをプレイヤーの正面へ回すのに使う。
+	//  ・モデルの正面(visual forward)は (-sin(yaw), 0, -cos(yaw)) 方向。
+	float GetYaw() const { return yaw_; }
+
 	// 移動可能な半径（フィールド半分のサイズ）を渡してクランプに使う。
 	// 原点中心で使う簡易版。
 	void SetMoveBounds(float halfX, float halfZ) {
@@ -46,6 +50,11 @@ public:
 
 	// 見た目の Object3d（敗北時の崩落演出などで外部から落下させるとき用）。
 	TuboEngine::Object3d* GetModel() const { return model_.get(); }
+
+	// 入力・移動をせず、その場でモデルの見た目だけ更新する（クリア演出などで
+	// プレイヤーを固定したまま、動くカメラに正しく追従させて描画するため）。
+	//  ・カメラを動かした後に呼ぶこと（最新のカメラで再投影される）。
+	void UpdateVisualOnly();
 
 	// 手持ちアイテム（拾う/捨てる/工作台へ載せる際に StageScene から操作する）。
 	void SetCarried(game::Item* item) { carried_ = item; }
