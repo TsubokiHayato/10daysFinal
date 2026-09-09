@@ -122,6 +122,15 @@ void StageScene::Update() {
 			// (3) 砲弾の発射・飛翔・命中
 			bulletManager_->Update();
 
+			// チュートリアル中(4項目すべて達成するまで)は敵に攻撃させない（生成/発射を止める）。
+			//  ・4項目=拾う/合成/装填/発射。すべて達成してから敵が攻撃を始める。
+			//  ※ Update 自体は毎フレーム呼ぶ必要がある（呼ばないとベルト等の Object3d が
+			//    未初期化のまま Draw されて commandList が null になり落ちる）。
+			const bool tutorialDone =
+				itemField_->GetTutorialFlagCarried() && itemField_->GetTutorialFlagCreate() &&
+				bulletManager_->GetTutorialFlagLoad() && bulletManager_->GetTutorialFlagShot();
+			enemyConveyor_->SetAttackSuppressed(!tutorialDone);
+
 			// (3.5) 敵の攻撃（ベルトコンベア→大砲→自陣の床）
 			enemyConveyor_->Update();
 

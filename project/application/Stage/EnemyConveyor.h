@@ -69,6 +69,10 @@ public:
 	// 飛翔中の敵弾を集める（弾同士の空中相殺に使う。借用ポインタ）。
 	std::vector<Bullet*> GetFlyingBullets();
 
+	// 攻撃を一時停止する（チュートリアル中など）。true の間はパーツ生成も発射もしない。
+	//  ・ベルト等の見た目は Update され続けるので、Draw は安全（描画に必要な初期化が走る）。
+	void SetAttackSuppressed(bool suppressed) { attackSuppressed_ = suppressed; }
+
 private:
 	// ベルト上を流れるパーツ1つ（胴 or 頭）。見た目は図鑑(PartDef)から作る。
 	struct Part {
@@ -87,6 +91,7 @@ private:
 	TuboEngine::Camera* camera_ = nullptr;
 	Field* enemyField_ = nullptr;  // 借用（広さ参照）
 	Field* playerField_ = nullptr; // 借用（床にダメージ）
+	bool attackSuppressed_ = false; // true の間は攻撃(生成/発射)を止める（見た目Updateは続ける）
 
 	TuboEngine::Math::Vector3 beltStart_{0.0f, 0.0f, 0.0f}; // ベルト始点(ゲート)
 	TuboEngine::Math::Vector3 beltEnd_{0.0f, 0.0f, 0.0f};   // ベルト終端(=大砲)
