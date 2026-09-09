@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "Input.h"
 #include "TextManager.h"
+#include "OffScreenRendering.h" // 敗北演出のビネット
 #include "Stage/StageLayout.h"
 #include "Stage/Bullet.h"
 #include <cstdio>
@@ -93,23 +94,30 @@ void StageScene::UpdateHpUI() {
 //  Update
 // =============================================================================
 void StageScene::Update() {
-	// (1) プレイヤー入力・移動
-	player_->Update();
+	const float dt = 1.0f / 60.0f;
 
-	// (2) E キー：砲台への装填(設置)を最優先。装填できなければアイテム操作(拾う/破棄/工作台へ)。
-	if (!bulletManager_->TryLoad(player_.get())) {
-		itemField_->HandleInteraction(player_.get());
+	// 敗北演出中は操作を受け付けない（崩落とビネットだけを見せる）。
+	if (!losing_) {
+		// (1) プレイヤー入力・移動
+		player_->Update();
+
+		// (2) E キー：砲台への装填(設置)を最優先。装填できなければアイテム操作(拾う/破棄/工作台へ)。
+		if (!bulletManager_->TryLoad(player_.get())) {
+			itemField_->HandleInteraction(player_.get());
+		}
+
+		// (3) 砲弾の発射・飛翔・命中
+		bulletManager_->Update();
+
+		// (3.5) 敵の攻撃（ベルトコンベア→大砲→自陣の床）
+		enemyConveyor_->Update();
+
+		// (3.6) 空中での弾の相殺（有効時のみ）。無効なら相殺せず互いの床にダメージが入る。
+		if (bulletCancelEnabled_) ResolveBulletClashes();
 	}
+
+	// アイテム（自陣崩落中は落下演出になる）。敗北演出中も進めて崩落を見せる。
 	itemField_->Update();
-
-	// (3) 砲弾の発射・飛翔・命中
-	bulletManager_->Update();
-
-	// (3.5) 敵の攻撃（ベルトコンベア→大砲→自陣の床）
-	enemyConveyor_->Update();
-
-	// (3.6) 空中での弾の相殺（有効時のみ）。無効なら相殺せず互いの床にダメージが入る。
-	if (bulletCancelEnabled_) ResolveBulletClashes();
 
 	// (4) 地形・床(HP)・大砲プロップ・グリッド
 	environment_->Update();
@@ -133,6 +141,59 @@ void StageScene::Update() {
 	itemdisplay_->Update(player_->GetCarried());
 
 	visualManager_->Update();
+
+	// (7) 敗北判定・演出：自陣(プレイヤーの陣地)の床が崩壊し始めたら敗北。
+	if (!losing_ && environment_->GetSelfField()->IsCollapsing()) {
+		StartLoseSequence();
+	}
+	if (losing_) {
+		UpdateLoseSequence(dt);
+	}
+}
+
+// =============================================================================
+//  敗北演出
+//   ・自陣の崩落を見せつつ、画面周辺をビネットで徐々に暗くする。
+//   ・一定時間後（崩落が終わるころ）にタイトルへ戻す。
+// =============================================================================
+void StageScene::StartLoseSequence() {
+	losing_ = true;
+	loseTimer_ = 0.0f;
+	// ビネットを有効化（現在のポストエフェクトを保存して Vignette へ切り替わる）。
+	OffScreenRendering::GetInstance()->SetLowHpVignetteEnabled(true);
+	// プレイヤーも床と一緒に崩落させる（以後 player_->Update() は止めて Collapser に任せる）。
+	playerFall_.Add(player_->GetModel());
+	playerFall_.Start();
+}
+
+void StageScene::UpdateLoseSequence(float dt) {
+	loseTimer_ += dt;
+
+	// プレイヤーを落下＋回転させる（床の崩落と一緒に落ちていく）。
+	playerFall_.Update();
+
+	// 演出の長さ（秒）。崩落アニメ(約2.5秒)が終わるころにタイトルへ。
+	constexpr float kLoseDuration = 3.0f;
+	// ビネット強度の始点/終点（0.8=通常, 大きいほど周辺が暗い）。
+	constexpr float kVignetteStart = 0.8f;
+	constexpr float kVignetteEnd = 14.0f;
+	// ビネットの広がり(scale)。16=通常。0 まで下げると画面中心まで暗転し、完全に真っ黒になる。
+	constexpr float kScaleStart = 16.0f;
+	constexpr float kScaleEnd = 0.0f;
+
+	// 経過に応じてビネットを濃くする。t^3 のイーズインで、終盤ほど急激に暗くする。
+	float t = loseTimer_ / kLoseDuration;
+	if (t > 1.0f) t = 1.0f;
+	float eased = t * t * t; // イーズイン（最初ゆっくり→最後に一気に暗転）
+	float power = kVignetteStart + (kVignetteEnd - kVignetteStart) * eased;
+	float scale = kScaleStart + (kScaleEnd - kScaleStart) * eased;
+	OffScreenRendering::GetInstance()->SetLowHpVignettePower(power);
+	OffScreenRendering::GetInstance()->SetLowHpVignetteScale(scale); // 最後は完全に真っ黒へ
+
+	// 演出が終わったらタイトルへ戻す。
+	if (loseTimer_ >= kLoseDuration) {
+		SceneManager::GetInstance()->ChangeScene(TITLE);
+	}
 }
 
 // =============================================================================
@@ -279,4 +340,7 @@ void StageScene::ImGuiDraw() {
 void StageScene::Finalize() {
 	TuboEngine::TextManager::GetInstance()->ClearAllTexts();
 	TuboEngine::TextManager::GetInstance()->ClearAllSprites();
+
+	// 敗北時のビネットはあえて無効化しない。暗いままタイトルへ引き継ぎ、
+	// タイトル側で一気に明るくする（リビール）演出につなげる。
 }

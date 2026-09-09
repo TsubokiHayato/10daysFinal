@@ -7,6 +7,7 @@
 #include "audio/AudioManager.h" // BGM / SE
 #include "ParticleManager.h"    // タイトル背景のパーティクル
 #include "IParticleEmitter.h"   // ParticlePreset 構造体
+#include "OffScreenRendering.h" // 敗北からのビネット・リビール演出
 #include <Windows.h> // PostQuitMessage（終了）
 #include <cstdlib>   // rand
 #include <cmath>     // sin
@@ -53,6 +54,10 @@ void TitleScene::Initialize() {
 
 	background = std::make_unique<TuboEngine::Object3d>();
 	background->Initialize("skyBox/skyBox.obj");
+
+	// 背景に、ゲーム内で使われている全オブジェクトを上空から降らせ続ける。
+	itemRain_ = std::make_unique<TitleItemRain>();
+	itemRain_->Initialize(camera_.get(), 24);
 
 	auto* tm = TextManager::GetInstance();
 
@@ -116,6 +121,11 @@ void TitleScene::Initialize() {
 	// シーン遷移フェード(入場で黒→クリア、退場で FadeOut)。
 	fadeScreen_ = std::make_unique<FadeScreen>();
 	fadeScreen_->Initialize();
+
+	// 敗北からのビネット引き継ぎ：ステージで暗転したビネットが有効なままなら、
+	// タイトルに入った直後に一気に明るくするリビール演出を始める。
+	vignetteReveal_ = OffScreenRendering::GetInstance()->IsLowHpVignetteEnabled();
+	vignetteTimer_ = 0.0f;
 }
 
 void TitleScene::Update() {
@@ -148,6 +158,12 @@ void TitleScene::Update() {
 
 	background->SetCamera(camera_.get());
 	background->Update();
+
+	// 降るオブジェクトを進める。
+	if (itemRain_) itemRain_->Update(dt);
+
+	// 敗北から来たときの「暗転→一気に明るく」リビール。
+	if (vignetteReveal_) UpdateVignetteReveal(dt);
 
 	// パーティクルはエンジンが自動更新しないので、シーンが駆動する。
 	ParticleManager::GetInstance()->Update(dt, camera_.get());
@@ -221,6 +237,37 @@ void TitleScene::UpdateMenuVisual(float dt) {
 	}
 }
 
+// 敗北から引き継いだ暗いビネットを、短時間で一気に明るくして最後に無効化する。
+void TitleScene::UpdateVignetteReveal(float dt) {
+	vignetteTimer_ += dt;
+
+	// リビールの長さ（秒）。短くして「一気に」明るくする。
+	constexpr float kRevealDuration = 0.45f;
+	// ステージ敗北時の完全暗転（power最大・scale=0）から通常値へ戻す。
+	//  ※ StageScene の kVignetteEnd/Start・kScaleStart/End と対応させること。
+	constexpr float kVignetteDark = 14.0f;   // power 開始（暗い）
+	constexpr float kVignetteBright = 0.8f;  // power 終了（通常）
+	constexpr float kScaleDark = 0.0f;       // scale 開始（真っ黒）
+	constexpr float kScaleBright = 16.0f;    // scale 終了（通常）
+
+	float t = vignetteTimer_ / kRevealDuration;
+	if (t > 1.0f) t = 1.0f;
+	// イーズアウト（最初に一気に明るくなり、最後にスッと収まる）。
+	float u = 1.0f - t;
+	float eased = 1.0f - u * u * u;
+	float power = kVignetteDark + (kVignetteBright - kVignetteDark) * eased;
+	float scale = kScaleDark + (kScaleBright - kScaleDark) * eased;
+	OffScreenRendering::GetInstance()->SetLowHpVignettePower(power);
+	OffScreenRendering::GetInstance()->SetLowHpVignetteScale(scale);
+
+	// 明るくなりきったらビネットを無効化して、元のポストエフェクトへ戻す。
+	if (vignetteTimer_ >= kRevealDuration) {
+		OffScreenRendering::GetInstance()->SetLowHpVignetteScale(kScaleBright); // 通常値へ確実に戻す
+		OffScreenRendering::GetInstance()->SetLowHpVignetteEnabled(false);
+		vignetteReveal_ = false;
+	}
+}
+
 void TitleScene::DecideSelection() {
 	switch (selected_) {
 	case kMenuStart:
@@ -286,6 +333,15 @@ void TitleScene::Finalize() {
 	title_ = nullptr;
 	hint_ = nullptr;
 
+	// 降るオブジェクト演出を片付ける（次シーンへ残さない）。
+	itemRain_.reset();
+
+	// リビール中にタイトルを離れた場合は、ビネットを無効化しておく（暗さを持ち越さない）。
+	if (vignetteReveal_) {
+		OffScreenRendering::GetInstance()->SetLowHpVignetteEnabled(false);
+		vignetteReveal_ = false;
+	}
+
 	// タイトル専用のパーティクルを片付ける（次シーンへ残さない）。
 	if (!particleName_.empty()) {
 		ParticleManager::GetInstance()->Remove(particleName_);
@@ -295,7 +351,8 @@ void TitleScene::Finalize() {
 
 void TitleScene::Object3DDraw() {
 	background->Draw();
-} // 3Dオブジェクト描画(背景スカイボックス)
+	if (itemRain_) itemRain_->Draw(); // 降るゲームオブジェクト
+} // 3Dオブジェクト描画(背景スカイボックス＋降るオブジェクト)
 void TitleScene::SpriteDraw() {
 	TuboEngine::TextManager::GetInstance()->DrawAll();
 	fadeScreen_->Draw();
