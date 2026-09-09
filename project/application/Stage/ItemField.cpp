@@ -23,13 +23,19 @@ void ItemField::Initialize(TuboEngine::Camera* camera, Field* selfField) {
 	camera_ = camera;
 	selfField_ = selfField;
 
-	// 工作台（製作台）。中央の大砲(キャノン)の左(-X＝画面左側)に置く。
+	// 工作台（製作台）。中央の大砲(キャノン)のすぐ手前(下)＝足元に置く。
 	const Math::Vector3 selfCenter = selfField_->GetCenter();
 	workbench_ = std::make_unique<Workbench>();
-	workbench_->Initialize(camera_, {selfCenter.x - 8.0f, 0.0f, selfCenter.z});
+	workbench_->Initialize(camera_, {selfCenter.x, 0.0f, selfCenter.z - 4.0f});
 
 	// パーツを自陣にランダムに散らばらせる。
 	ScatterParts();
+
+	keyIconE_ = std::make_unique<TuboEngine::Object3d>();
+	keyIconE_->Initialize("CraftEButton/EButton.obj");
+	keyIconE_->SetCamera(camera_);
+	keyIconE_->SetPosition({ 0.0f,0.0f,0.0f });
+
 }
 
 Item* ItemField::SpawnPart(const PartDef& def, const Math::Vector3& pos) {
@@ -131,6 +137,12 @@ void ItemField::HandleInteraction(Player* player) {
 			}
 		}
 	}
+
+	if (player->IsCarrying()) {
+		if (player->GetCarried()->GetCategory() != Category::Shell) {
+			isCarrying_ = true;
+		}
+	}
 }
 
 void ItemField::Update() {
@@ -169,10 +181,27 @@ void ItemField::Update() {
 	items_.erase(std::remove_if(items_.begin(), items_.end(),
 	                            [](const std::unique_ptr<Item>& it) { return !it->IsActive(); }),
 	             items_.end());
+
+	if (isCarrying_) {
+		iconETimer_ += 1.0f / 60.0f;
+	} else {
+		iconETimer_ -= 1.0f / 60.0f;
+	}
+
+	iconETimer_ = std::clamp(iconETimer_, 0.0f, iconEMaxTime_);
+
+	keyIconE_->SetModelColor({ 1.0f,1.0f,1.0f,iconETimer_ / iconEMaxTime_ });
+	keyIconE_->SetPosition({ workbench_->GetPosition().x,workbench_->GetPosition().y + 6.0f,workbench_->GetPosition().z + 2.0f });
+	keyIconE_->SetRotation({ 0.2f,3.14f,0.0f });
+	keyIconE_->SetScale({ 2.0f,2.0f,2.0f });
+	keyIconE_->Update();
+	isCarrying_ = false;
+
 }
 
 void ItemField::Draw() {
 	workbench_->Draw();
+	keyIconE_->Draw();
 	for (auto& it : items_) it->Draw();
 }
 
