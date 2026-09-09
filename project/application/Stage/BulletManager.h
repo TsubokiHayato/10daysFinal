@@ -61,6 +61,16 @@ private:
 	std::vector<std::unique_ptr<Bullet>> bullets_; // 発射済み・飛翔中の弾
 	Bullet* pending_ = nullptr;                    // 装填済み・発射待ち（bullets_内を借用）
 
+	std::unique_ptr<TuboEngine::Object3d> keyIconE_;
+	bool isLoading_ = false;
+	float iconETimer_ = 0.0f;
+	float iconEMaxTime_ = 0.3f;
+
+	std::unique_ptr<TuboEngine::Object3d> keyIconSpace_;
+	bool isShot_ = false;
+	float iconSpaceTimer_ = 0.0f;
+	float iconSpaceMaxTime_ = 0.3f;
+
 	bool tutorialFlagLoad_ = false;
 	bool tutorialFlagShot_ = false;
 };

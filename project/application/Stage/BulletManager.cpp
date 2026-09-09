@@ -29,15 +29,31 @@ void BulletManager::Initialize(TuboEngine::Camera* camera,
 	cannonRound_->Initialize("playerBullet/playerBullet.obj");
 	cannonRound_->SetCamera(camera_);
 	cannon_->SetBullet(cannonRound_.get());
+
+	keyIconE_ = std::make_unique<TuboEngine::Object3d>();
+	keyIconE_->Initialize("EButton/EButton.obj");
+	keyIconE_->SetCamera(camera_);
+	keyIconE_->SetPosition({ 0.0f,0.0f,0.0f });
+
+	keyIconSpace_ = std::make_unique<TuboEngine::Object3d>();
+	keyIconSpace_->Initialize("SpaceButton/SpaceButton.obj");
+	keyIconSpace_->SetCamera(camera_);
+	keyIconSpace_->SetPosition({ 0.0f,0.0f,0.0f });
 }
 
 bool BulletManager::TryLoad(Player* player) {
-	// E押下・装填中でない・砲弾を持っている、が前提。
-	if (!Input::GetInstance()->TriggerKey(DIK_E) || pending_) return false;
+
 	Item* carried = player->GetCarried();
 	if (!carried || carried->GetCategory() != Category::Shell) return false;
 	// 砲台が近くにあること。
-	if (Dist2XZ(player->GetPosition(), muzzle_) >= kCannonRange * kCannonRange) return false;
+	if (Dist2XZ(player->GetPosition(), muzzle_) >= kCannonRange * kCannonRange) {
+		isLoading_ = false;
+		return false;
+	} else {
+		isLoading_ = true;
+	}
+	// E押下・装填中でない・砲弾を持っている、が前提。
+	if (!Input::GetInstance()->TriggerKey(DIK_E) || pending_) return false;
 
 	// 弾は「全ステータス＋的」を持って生まれる。的は相手大砲(中央)そのもの。
 	//  着地点を固定することで自弾・敵弾が同じ線上を通り、空中で相殺できる。
@@ -54,10 +70,15 @@ bool BulletManager::TryLoad(Player* player) {
 
 	tutorialFlagLoad_ = true;
 
+	isLoading_ = false;
+
+	isShot_ = true;
+
 	return true;
 }
 
 void BulletManager::Update() {
+
 	// ── 砲台の更新：SPACEで撃つ/撃たないフラグを立てる ──
 	cannon_->Update();
 
@@ -66,6 +87,7 @@ void BulletManager::Update() {
 		if (pending_) {
 			pending_->Fire(); // 以後は弾が自分で的へ飛ぶ
 			pending_ = nullptr;
+			isShot_ = false;
 		}
 		cannon_->SetIsBulletFired(false); // 次弾に備えてフラグを戻す
 
@@ -87,10 +109,41 @@ void BulletManager::Update() {
 	bullets_.erase(std::remove_if(bullets_.begin(), bullets_.end(),
 	                              [](const std::unique_ptr<Bullet>& b) { return !b->IsActive(); }),
 	               bullets_.end());
+
+	if (isLoading_) {
+		iconETimer_ += 1.0f / 60.0f;
+	} else {
+		iconETimer_ -= 1.0f / 60.0f;
+	}
+
+	iconETimer_ = std::clamp(iconETimer_, 0.0f, iconEMaxTime_);
+
+	keyIconE_->SetModelColor({ 1.0f,1.0f,1.0f,iconETimer_ / iconEMaxTime_ });
+	keyIconE_->SetPosition({ muzzle_.x,muzzle_.y + 6.0f,muzzle_.z + 2.0f });
+	keyIconE_->SetRotation({ 0.2f,3.14f,0.0f });
+	keyIconE_->SetScale({ 3.0f,3.0f,3.0f });
+	keyIconE_->Update();
+
+	if (isShot_) {
+		iconSpaceTimer_ += 1.0f / 60.0f;
+	} else {
+		iconSpaceTimer_ -= 1.0f / 60.0f;
+	}
+
+	iconSpaceTimer_ = std::clamp(iconSpaceTimer_, 0.0f, iconSpaceMaxTime_);
+
+	keyIconSpace_->SetModelColor({ 1.0f,1.0f,1.0f,iconSpaceTimer_ / iconEMaxTime_ });
+	keyIconSpace_->SetPosition({ muzzle_.x,muzzle_.y + 6.0f,muzzle_.z + 2.0f });
+	keyIconSpace_->SetRotation({ 0.2f,3.14f,0.0f });
+	keyIconSpace_->SetScale({ 3.0f,3.0f,3.0f });
+	keyIconSpace_->Update();
 }
 
 void BulletManager::Draw() {
 	for (auto& b : bullets_) b->Draw();
+
+	keyIconE_->Draw();
+	keyIconSpace_->Draw();
 }
 
 std::vector<Bullet*> BulletManager::GetFlyingBullets() {
