@@ -102,67 +102,73 @@ void StageScene::UpdateHpUI() {
 void StageScene::Update() {
 	const float dt = 1.0f / 60.0f;
 
-	// 敗北演出中は操作を受け付けない（崩落とビネットだけを見せる）。
-	if (!losing_) {
-		// (1) プレイヤー入力・移動
-		player_->Update();
+	// (0) ポーズ(オプション)は常に更新する。ESCで開閉し、開いている間はメニュー操作を受ける。
+	option_->Update();
+	// ポーズ中はゲーム進行を止める（閉じたらそのまま再開できる）。
+	const bool paused = option_->IsOpen();
 
-		// (2) E キー：砲台への装填(設置)を最優先。装填できなければアイテム操作(拾う/破棄/工作台へ)。
-		if (!bulletManager_->TryLoad(player_.get())) {
-			itemField_->HandleInteraction(player_.get());
+	// --- ワールドの進行（ポーズ中は丸ごと止める）---
+	if (!paused) {
+		// 敗北演出中は操作を受け付けない（崩落とビネットだけを見せる）。
+		if (!losing_) {
+			// (1) プレイヤー入力・移動
+			player_->Update();
+
+			// (2) E キー：砲台への装填(設置)を最優先。装填できなければアイテム操作(拾う/破棄/工作台へ)。
+			if (!bulletManager_->TryLoad(player_.get())) {
+				itemField_->HandleInteraction(player_.get());
+			}
+
+			// (3) 砲弾の発射・飛翔・命中
+			bulletManager_->Update();
+
+			// (3.5) 敵の攻撃（ベルトコンベア→大砲→自陣の床）
+			enemyConveyor_->Update();
+
+			// (3.6) 空中での弾の相殺（有効時のみ）。無効なら相殺せず互いの床にダメージが入る。
+			if (bulletCancelEnabled_) ResolveBulletClashes();
 		}
 
-		// (3) 砲弾の発射・飛翔・命中
-		bulletManager_->Update();
+		// アイテム（自陣崩落中は落下演出になる）。敗北演出中も進めて崩落を見せる。
+		itemField_->Update();
 
-		// (3.5) 敵の攻撃（ベルトコンベア→大砲→自陣の床）
-		enemyConveyor_->Update();
+		// (4) 地形・床(HP)・大砲プロップ・グリッド
+		environment_->Update();
 
-		// (3.6) 空中での弾の相殺（有効時のみ）。無効なら相殺せず互いの床にダメージが入る。
-		if (bulletCancelEnabled_) ResolveBulletClashes();
+		// (5) カメラ：砲台に近づいたら自動ズームアウト（TAB長押しでも可）。
+		//     さらに、どちらかの床HPが0になって崩壊し始めたら、強制的に全体を引く。
+		const bool nearCannon =
+			game::Dist2XZ(player_->GetPosition(), environment_->GetMuzzle()) <
+			game::layout::kCannonZoomRange * game::layout::kCannonZoomRange;
+		const bool anyCollapsing = environment_->GetSelfField()->IsCollapsing() ||
+		                           environment_->GetEnemyField()->IsCollapsing();
+		camera_->Update(player_->GetPosition(), nearCannon || anyCollapsing);
+
+		tutorial_->Update(
+			itemField_->GetTutorialFlagCarried(),
+			itemField_->GetTutorialFlagCreate(),
+			bulletManager_->GetTutorialFlagLoad(),
+			bulletManager_->GetTutorialFlagShot()
+		);
+
+		visualManager_->Update();
+
+		// (7) 敗北判定・演出：自陣(プレイヤーの陣地)の床が崩壊し始めたら敗北。
+		if (!losing_ && environment_->GetSelfField()->IsCollapsing()) {
+			StartLoseSequence();
+		}
+		if (losing_) {
+			UpdateLoseSequence(dt);
+		}
 	}
 
-	// アイテム（自陣崩落中は落下演出になる）。敗北演出中も進めて崩落を見せる。
-	itemField_->Update();
-
-	// (4) 地形・床(HP)・大砲プロップ・グリッド
-	environment_->Update();
-
-	// (5) カメラ：砲台に近づいたら自動ズームアウト（TAB長押しでも可）。
-	//     さらに、どちらかの床HPが0になって崩壊し始めたら、強制的に全体を引く。
-	const bool nearCannon =
-		game::Dist2XZ(player_->GetPosition(), environment_->GetMuzzle()) <
-		game::layout::kCannonZoomRange * game::layout::kCannonZoomRange;
-	const bool anyCollapsing = environment_->GetSelfField()->IsCollapsing() ||
-	                           environment_->GetEnemyField()->IsCollapsing();
-	camera_->Update(player_->GetPosition(), nearCannon || anyCollapsing);
-
-
+	// --- 表示系は常に更新（ポーズメニューやUIが正しく描画されるように）---
 	TuboEngine::TextManager::GetInstance()->UpdateAll();
-	// (5.5)　オプションの更新
-	option_->Update();
 
 	// (6) HP UI(スプライト)を床HPに合わせて更新（UpdateAllでジオメトリに反映される前に）
 	UpdateHpUI();
 	// (6) アイテム情報のUI表示
 	itemdisplay_->Update(player_->GetCarried());
-
-	tutorial_->Update(
-		itemField_->GetTutorialFlagCarried(),
-		itemField_->GetTutorialFlagCreate(),
-		bulletManager_->GetTutorialFlagLoad(),
-		bulletManager_->GetTutorialFlagShot()
-	);
-
-	visualManager_->Update();
-
-	// (7) 敗北判定・演出：自陣(プレイヤーの陣地)の床が崩壊し始めたら敗北。
-	if (!losing_ && environment_->GetSelfField()->IsCollapsing()) {
-		StartLoseSequence();
-	}
-	if (losing_) {
-		UpdateLoseSequence(dt);
-	}
 }
 
 // =============================================================================
