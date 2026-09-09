@@ -37,6 +37,9 @@ public:
 	int CountGround() const;
 	int CountShells() const;
 
+	bool GetTutorialFlagCarried() { return tutorialFlagCarried_; }
+	bool GetTutorialFlagCreate() { return tutorialFlagCreate_; }
+
 private:
 	Item* SpawnPart(const PartDef& def, const TuboEngine::Math::Vector3& pos);
 	Item* SpawnShell(const ShellStats& stats, const TuboEngine::Math::Vector3& pos);
@@ -56,6 +59,9 @@ private:
 	std::vector<std::unique_ptr<Item>> items_;
 	std::unique_ptr<Workbench> workbench_;
 
+	bool tutorialFlagCarried_ = false;
+
+	bool tutorialFlagCreate_ = false;
 	float spawnTimer_ = 0.0f; // 自動湧きのカウンタ
 	Collapser itemFall_;      // 自陣の床崩壊時に作業台・アイテムも落とす
 };

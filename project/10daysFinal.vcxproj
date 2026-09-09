@@ -122,6 +122,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\Stage\Bullet.cpp" />
     <ClCompile Include="application\Stage\Castle.cpp" />
     <ClCompile Include="application\Stage\ItemDisplay.cpp" />
+    <ClCompile Include="application\Stage\Option.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="FadeScreen.cpp" />
     <ClCompile Include="application\Order.cpp" />
@@ -147,6 +148,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\Stage\EnemyConveyor.cpp" />
     <ClCompile Include="application\Stage\ItemField.cpp" />
     <ClCompile Include="application\Stage\StageCameraController.cpp" />
+    <ClCompile Include="application\Stage\Tutorial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\Stage\Cannon.h" />
@@ -154,6 +156,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\Stage\Collapser.h" />
     <ClInclude Include="application\Stage\Castle.h" />
     <ClInclude Include="application\Stage\ItemDisplay.h" />
+    <ClInclude Include="application\Stage\Option.h" />
     <ClInclude Include="application\Stage\StatusEffect.h" />
     <ClInclude Include="FadeScreen.h" />
     <ClInclude Include="application\Order.h" />
@@ -181,6 +184,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\Stage\EnemyConveyor.h" />
     <ClInclude Include="application\Stage\ItemField.h" />
     <ClInclude Include="application\Stage\StageCameraController.h" />
+    <ClInclude Include="application\Stage\Tutorial.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="EngineCore\EngineLib\EngineLib.vcxproj">

@@ -3,6 +3,7 @@
 #include "externals/imgui/imgui.h"
 #endif
 #include "Input.h"            // キーボード / マウス / ゲームパッド入力（エンジンが毎フレーム自動 Update）
+#include "TextManager.h"
 
 using namespace TuboEngine;
 
@@ -33,6 +34,9 @@ void OnoderaScene::Initialize() {
 	bullet_->SetPosition({ 2.0f, 0.0f, 0.0f });
 	// 最初は砲台の位置に置いておく
 	cannon_->SetBullet(bullet_.get());
+
+	option_ = std::make_unique<game::Option>();
+	option_->Initialize();
 }
 
 // =============================================================================
@@ -65,6 +69,10 @@ void OnoderaScene::Update() {
 	cannon_->Update();
 	player_->Update();
 	bullet_->Update();
+
+	// TextManager 更新。Particle と同様にシーンが駆動する。		
+	TextManager::GetInstance()->UpdateAll();
+	option_->Update();
 }
 
 // =============================================================================
@@ -76,7 +84,10 @@ void OnoderaScene::Object3DDraw() {
 	bullet_->Draw();
 }
 
-void OnoderaScene::SpriteDraw() {}
+void OnoderaScene::SpriteDraw() {
+	TuboEngine::TextManager::GetInstance()->DrawAll();
+	option_->Draw();
+}
 
 void OnoderaScene::ParticleDraw() {}
 
@@ -94,4 +105,9 @@ void OnoderaScene::ImGuiDraw() {
 // =============================================================================
 //  Finalize
 // =============================================================================
-void OnoderaScene::Finalize() {}
+void OnoderaScene::Finalize() {
+	// TextManager はシングルトンでシーンを越えて生存するため、
+	// このシーンで作ったテキストは退場時に必ず片付ける。
+	TuboEngine::TextManager::GetInstance()->ClearAllTexts();
+	TuboEngine::TextManager::GetInstance()->ClearAllSprites();
+}

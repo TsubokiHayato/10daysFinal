@@ -10,6 +10,8 @@
 #include "Stage/VisualManager.h"
 #include "Stage/ItemDisplay.h"
 #include "Stage/Collapser.h" // 敗北時にプレイヤーを落とす
+#include "Stage/Tutorial.h"
+#include "stage/Option.h"
 #include <memory>
 
 // =============================================================================
@@ -74,4 +76,8 @@ private:
 	game::Collapser playerFall_; // 敗北時にプレイヤーを床と一緒に落下させる。
 	// アイテムの情報を表示するUIクラス。プレイヤーがアイテムを持つと現れる
 	std::unique_ptr <game::ItemDisplay> itemdisplay_;
+	std::unique_ptr<Tutorial> tutorial_;
+
+	// オプションクラス
+	std::unique_ptr<game::Option> option_;
 };

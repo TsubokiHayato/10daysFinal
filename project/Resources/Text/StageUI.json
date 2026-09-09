@@ -1,0 +1,68 @@
+{
+  "sprites": [
+    {
+      "anchor": 0,
+      "anchorPoint": [
+        0.0,
+        0.0
+      ],
+      "color": [
+        0.1283522993326187,
+        0.8108108043670654,
+        0.17051179707050323,
+        1.0
+      ],
+      "margin": [
+        20.0,
+        20.0
+      ],
+      "name": "PlayerHP",
+      "position": [
+        20.0,
+        40.0
+      ],
+      "relativeAnchor": 0,
+      "relativeGap": 8.0,
+      "relativeTo": "",
+      "rotation": 0.0,
+      "size": [
+        525.0,
+        40.0
+      ],
+      "texture": "Hp.png"
+    },
+    {
+      "anchor": 0,
+      "anchorPoint": [
+        1.0,
+        0.0
+      ],
+      "color": [
+        0.9420849680900574,
+        0.09093482047319412,
+        0.09093482047319412,
+        1.0
+      ],
+      "margin": [
+        20.0,
+        20.0
+      ],
+      "name": "EnemyHP",
+      "position": [
+        1260.0,
+        80.0
+      ],
+      "relativeAnchor": 0,
+      "relativeGap": 8.0,
+      "relativeTo": "",
+      "rotation": 0.0,
+      "size": [
+        525.0,
+        40.0
+      ],
+      "texture": "Hp.png"
+    }
+  ],
+  "texts": [
+  ]
+}

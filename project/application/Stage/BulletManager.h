@@ -43,6 +43,9 @@ public:
 	bool HasPending() const { return pending_ != nullptr; }
 	int ActiveCount() const { return static_cast<int>(bullets_.size()); }
 
+	bool GetTutorialFlagLoad() { return tutorialFlagLoad_; }
+	bool GetTutorialFlagShot() { return tutorialFlagShot_; }
+
 	// 発射済み・飛翔中の弾を集める（弾同士の空中相殺に使う。借用ポインタ）。
 	std::vector<Bullet*> GetFlyingBullets();
 
@@ -57,6 +60,9 @@ private:
 
 	std::vector<std::unique_ptr<Bullet>> bullets_; // 発射済み・飛翔中の弾
 	Bullet* pending_ = nullptr;                    // 装填済み・発射待ち（bullets_内を借用）
+
+	bool tutorialFlagLoad_ = false;
+	bool tutorialFlagShot_ = false;
 };
 
 } // namespace game
